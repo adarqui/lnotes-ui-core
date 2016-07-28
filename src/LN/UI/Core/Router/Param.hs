@@ -19,6 +19,7 @@ import qualified Data.Map   as Map
 import           Data.Maybe (Maybe (..), catMaybes, maybe)
 import           Data.Text  (Text)
 import qualified Data.Text  as Text
+import           Prelude    hiding (Maybe (..), maybe)
 import           Text.Read  (readMaybe)
 
 import           LN.T

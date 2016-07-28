@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveAnyClass    #-}
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS -fno-warn-orphans #-}
 
 module LN.UI.Core.Router.CRUD (
   CRUD (..),
@@ -12,21 +13,15 @@ module LN.UI.Core.Router.CRUD (
 import           Control.Applicative
 import           Control.DeepSeq                    (NFData)
 import           Data.Int                           (Int64)
-import qualified Data.Map                           as M
-import           Data.Monoid                        ((<>))
 import           Data.Text                          (Text)
 import qualified Data.Text                          as Text
-import           Data.Tuple                         (fst)
-import           Prelude                            (Bool (..), Eq, Show, pure,
-                                                     show, ($), (++), (==))
+import           Prelude                            (Bool (..), Eq, Show, show,
+                                                     ($))
 import           Text.ParserCombinators.Parsec.Prim (try)
 import           Web.Routes
 
-import           LN.UI.Core.Helpers.WebRoutes
-import           LN.UI.Core.Router.Link                  (HasLink (..))
-import           LN.UI.Core.Router.LinkName              (HasLinkName, linkName)
-import           LN.UI.Core.Router.Param                 (emptyParams)
-import           LN.UI.Core.Types                        (Int, Number, String, tuple)
+import           LN.UI.Core.Router.Link             ()
+import           LN.UI.Core.Router.LinkName         (HasLinkName, linkName)
 
 
 
@@ -84,9 +79,9 @@ bool2Text False = "false"
 
 
 
-text2Bool :: Text -> Bool
-text2Bool "true" = True
-text2Bool _      = False
+-- text2Bool :: Text -> Bool
+-- text2Bool "true" = True
+-- text2Bool _      = False
 
 
 

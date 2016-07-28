@@ -24,16 +24,15 @@ module LN.UI.Core.PageInfo (
 
 import           Control.DeepSeq         (NFData)
 import           Data.Int                (Int64)
-import           Data.List               (head)
 import qualified Data.Map                as Map (lookup)
 import           Data.Maybe              (maybe)
 import           Data.Typeable           (Typeable)
 import           GHC.Generics            (Generic)
+import           Prelude                 hiding (maybe)
 
-import           LN.T                    (CountResponses, OrderBy (..),
-                                          OrderBy (..), Param (..),
-                                          ParamTag (..), SortOrderBy (..),
-                                          SortOrderBy (..))
+import           LN.T                    (OrderBy (..), OrderBy (..),
+                                          Param (..), ParamTag (..),
+                                          SortOrderBy (..), SortOrderBy (..))
 import           LN.UI.Core.Router.Param (Params)
 
 

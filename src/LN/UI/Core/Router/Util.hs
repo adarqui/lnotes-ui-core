@@ -9,20 +9,18 @@ module LN.UI.Core.Router.Util (
 
 
 
-import qualified Data.Map         as M
-import           Data.Monoid      ((<>))
-import           LN.UI.Core.Types (Tuple)
-import           Prelude          (String, undefined, (.))
+import           Data.Monoid ((<>))
+import           Prelude     (String, undefined)
 
 
 
 mkUri :: String -> String
-mkUri url = undefined -- encodeURI url
+mkUri _ = undefined -- encodeURI url
 
 
 
 unUri :: String -> String
-unUri url = undefined -- decodeURI url
+unUri _ = undefined -- decodeURI url
 
 
 
