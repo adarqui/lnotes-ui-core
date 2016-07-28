@@ -17,6 +17,8 @@ library
   hs-source-dirs:      src
   exposed-modules:     LN.UI.Core
                        LN.UI.Core.Access
+                       LN.UI.Core.App
+                       LN.UI.Core.Control
                        LN.UI.Core.Loader
                        LN.UI.Core.PageInfo
                        LN.UI.Core.PageNumbers
@@ -51,6 +53,7 @@ library
                      , text
                      , time
                      , transformers
+                     , tuple
                      , web-routes == 99.99
                      , haskell-api-helpers-shared
                      , haskell-ln-types
