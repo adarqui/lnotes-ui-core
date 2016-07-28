@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module LN.UI.Core.Router.Param (
-  Params (..),
+  Params,
   emptyParams,
   lookupParam,
   fixParams,
@@ -14,19 +14,15 @@ module LN.UI.Core.Router.Param (
 
 
 
-import           Data.Int         (Int64)
-import           Data.Map         (Map)
-import qualified Data.Map         as Map
-import           Data.Maybe       (Maybe (..), catMaybes, maybe)
-import           Data.Monoid      ((<>))
-import           Data.Text        (Text)
-import qualified Data.Text        as Text
-import           Prelude
-import           Text.Read        (readMaybe)
+import           Data.Int   (Int64)
+import           Data.Map   (Map)
+import qualified Data.Map   as Map
+import           Data.Maybe (Maybe (..), catMaybes, maybe)
+import           Data.Text  (Text)
+import qualified Data.Text  as Text
+import           Text.Read  (readMaybe)
 
-import           LN.T             (OrderBy (..), Param (..), ParamTag (..),
-                                   SortOrderBy (..))
-import           LN.UI.Core.Types (Tuple, tuple)
+import           LN.T
 
 
 
@@ -59,37 +55,17 @@ sanitizeWebRoutesParams m_params = catMaybes $ map mapParam m_params
 
 
 fromWebRoutesParams :: [(Text, Maybe Text)] -> [(ParamTag, Param)]
-fromWebRoutesParams = catMaybes . map paramFromKV'' . sanitizeWebRoutesParams
+fromWebRoutesParams = catMaybes . map paramFromKV_ . sanitizeWebRoutesParams
 
 
 
 fixParams :: Params -> Params
 fixParams = id
--- fixParams :: Params -> PSRoutingParams
--- fixParams params = M.fromList $ map (qp <<< snd) $ M.toList params --  M.fromList <<< arrayToList
--- fixParams params = M.fromList $ map (qp <<< snd) $ M.toList params --  M.fromList <<< arrayToList
 
 
 
-paramFromKV :: String -> String -> Maybe Param
-paramFromKV k v = Nothing
-
-
-
-paramFromKV' :: String -> String -> Maybe (Tuple String Param)
-paramFromKV' k v =
-  case (read k) of
-    Nothing    -> Nothing
-    Just ParamTag_Limit     -> maybe Nothing (\v -> Just $ tuple k (Limit v)) (read v)
-    Just ParamTag_Offset    -> maybe Nothing (\v -> Just $ tuple k (Offset v)) (read v)
-    Just ParamTag_Order     -> Just $ tuple k (Order $ read v)
-    Just ParamTag_SortOrder -> Just $ tuple k (SortOrder $ read v)
-    Just _                  -> Nothing
-
-
-
-paramFromKV'' :: (Text, Text) -> Maybe (ParamTag, Param)
-paramFromKV'' (k, v) =
+paramFromKV_ :: (Text, Text) -> Maybe (ParamTag, Param)
+paramFromKV_ (k, v) =
   case (readMaybe $ Text.unpack k) of
     Nothing    -> Nothing
     Just ParamTag_Limit     -> maybe Nothing (\v' -> Just (ParamTag_Limit, Limit v')) (readMaybe $ Text.unpack v)

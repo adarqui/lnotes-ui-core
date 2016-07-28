@@ -6,7 +6,7 @@ module LN.UI.Core.Helpers.DataList (
 
 
 
-import           Data.List   (splitAt, tail)
+import qualified Data.List   as List (splitAt, tail)
 import           Data.Monoid ((<>))
 
 
@@ -14,13 +14,13 @@ import           Data.Monoid ((<>))
 deleteNth :: Int -> [a] -> [a]
 deleteNth nth as = xs <> tailFriendly ys
   where
-  (xs, ys) = splitAt nth as
+  (xs, ys) = List.splitAt nth as
 
 
 
 tailFriendly :: [a] -> [a]
 tailFriendly [] = []
-tailFriendly xs = tail xs
+tailFriendly xs = List.tail xs
 
 
 

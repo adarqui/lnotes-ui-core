@@ -7,7 +7,7 @@ module LN.UI.Core.Helpers.WebRoutes (
 
 
 import           Data.Text        (Text)
-import qualified Data.Text        as Text (null, unpack)
+import qualified Data.Text        as Text (null)
 import           Text.Parsec.Prim ((<?>))
 import           Web.Routes
 
