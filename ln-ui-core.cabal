@@ -1,5 +1,5 @@
 name:                ln-ui-core
-version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            Core routines for ln-ui-*
 description:         Please see README.md
 homepage:            https://github.com/adarqui/ln-ui-core#readme
@@ -29,6 +29,7 @@ library
                        LN.UI.Core.Helpers.WebRoutes
                        LN.UI.Core.Router
                        LN.UI.Core.Router.CRUD
+                       LN.UI.Core.Router.Crumb
                        LN.UI.Core.Router.Link
                        LN.UI.Core.Router.LinkName
                        LN.UI.Core.Router.OrderBy
