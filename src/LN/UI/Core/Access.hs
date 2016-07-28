@@ -1,5 +1,5 @@
+{-# LANGUAGE RankNTypes      #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE RankNTypes #-}
 
 -- | Not used right now.. need to figure out how to make this generic for use in React.Flux for example.
 --
@@ -29,13 +29,12 @@ module LN.UI.Core.Access (
 
 
 import           LN.T
-import           LN.UI.Core.Types
 
 
 
-class HasAccess a where
-  open :: a -> a
-  empty :: a
+class Monoid m => HasAccess m where
+  open :: m -> m
+  empty :: m
 
 
 
@@ -93,11 +92,13 @@ permissionsHTML
   -> m
 permissionsHTML perms create_cb no_create_cb read_cb no_read_cb update_cb no_update_cb delete_cb no_delete_cb execute_cb no_execute_cb = do
   open $ do
-    if Perm_Create  `elem` perms then create_cb  else no_create_cb
-    --  if Perm_Read    `elem` perms then read_cb    else no_read_cb
-    -- if Perm_Update  `elem` perms then update_cb  else no_update_cb
-    -- if Perm_Delete  `elem` perms then delete_cb  else no_delete_cb
-    -- if Perm_Execute `elem` perms then execute_cb else no_execute_cb
+    mconcat
+      [ if Perm_Create  `elem` perms then create_cb  else no_create_cb
+      , if Perm_Read    `elem` perms then read_cb    else no_read_cb
+      , if Perm_Update  `elem` perms then update_cb  else no_update_cb
+      , if Perm_Delete  `elem` perms then delete_cb  else no_delete_cb
+      , if Perm_Execute `elem` perms then execute_cb else no_execute_cb
+      ]
 
 
 
