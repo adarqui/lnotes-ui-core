@@ -19,6 +19,7 @@ library
                        LN.UI.Core.Types
                        LN.UI.Core.PageInfo
                        LN.UI.Core.PageNumbers
+                       LN.UI.Core.Sort
                        LN.UI.Core.Helpers.DataInt
                        LN.UI.Core.Helpers.DataList
                        LN.UI.Core.Helpers.DataText
