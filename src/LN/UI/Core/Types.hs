@@ -14,11 +14,13 @@ module LN.UI.Core.Types (
   pattern Cons,
   pattern Nil,
   OrganizationName,
+  UserName,
   ForumName,
   BoardName,
   ThreadName,
   ThreadPostName,
   OrganizationId,
+  UserId,
   ForumId,
   BoardId,
   ThreadId,
@@ -56,6 +58,7 @@ pattern Nil       = []
 
 
 type OrganizationName = Text
+type UserName         = Text
 type ForumName        = Text
 type BoardName        = Text
 type ThreadName       = Text
@@ -64,6 +67,7 @@ type ThreadPostName   = Text
 
 
 type OrganizationId = Int64
+type UserId         = Int64
 type ForumId        = Int64
 type BoardId        = Int64
 type ThreadId       = Int64

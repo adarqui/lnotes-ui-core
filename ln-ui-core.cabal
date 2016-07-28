@@ -38,6 +38,8 @@ library
                        LN.UI.Core.Router.Param
                        LN.UI.Core.Router.Route
                        LN.UI.Core.Router.Util
+                       LN.UI.Core.State
+                       LN.UI.Core.State.Internal
   build-depends:       base >= 4.7 && < 5
                      , bytestring
                      , containers
