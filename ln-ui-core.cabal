@@ -16,31 +16,61 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     LN.UI.Core
-                       LN.UI.Router
-                       LN.UI.Router.CRUD
-                       LN.UI.Router.Link
-                       LN.UI.Router.LinkName
-                       LN.UI.Router.OrderBy
-                       LN.UI.Router.Param
-                       LN.UI.Router.Route
-                       LN.UI.Router.Util
+                       LN.UI.Core.Types
+                       LN.UI.Core.PageInfo
+                       LN.UI.Core.PageNumbers
+                       LN.UI.Core.Helpers.DataInt
+                       LN.UI.Core.Helpers.DataList
+                       LN.UI.Core.Helpers.DataText
+                       LN.UI.Core.Helpers.DataTime
+                       LN.UI.Core.Helpers.GHCJS
+                       LN.UI.Core.Helpers.HaskellApiHelpers
+                       LN.UI.Core.Helpers.Map
+                       LN.UI.Core.Helpers.WebRoutes
+                       LN.UI.Core.Router
+                       LN.UI.Core.Router.CRUD
+                       LN.UI.Core.Router.Link
+                       LN.UI.Core.Router.LinkName
+                       LN.UI.Core.Router.OrderBy
+                       LN.UI.Core.Router.Param
+                       LN.UI.Core.Router.Route
+                       LN.UI.Core.Router.Util
   build-depends:       base >= 4.7 && < 5
+                     , bytestring
                      , containers
+                     , deepseq
+                     , data-default
                      , mtl
+                     , parsec
                      , text
+                     , time
                      , transformers
-                     , web-routes
+                     , web-routes == 99.99
                      , haskell-api-helpers-shared
                      , haskell-ln-types
+  if impl(ghcjs)
+    build-depends:     ghcjs-ajax, ln-api-ghcjs, haskell-api-helpers-ghcjs
+  else
+    build-depends:     ln-api, haskell-api-helpers
+  if impl(ghcjs)
+    build-depends:     ghcjs-base
+  ghc-options:         -Wall
   default-language:    Haskell2010
 
-test-suite ln-ui-core-test
+test-suite ln-ui-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
+  other-modules:       LN.UI.Core.PageNumbersSpec
+                     , LN.UI.Core.Router.RouteSpec
+                     , LN.UI.Core.Router.CRUDSpec
   build-depends:       base
+                     , hspec
+                     , text
+                     , web-routes
+                     , haskell-ln-types
                      , ln-ui-core
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  ghc-options:         -Wall -O2 -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
 
 source-repository head
