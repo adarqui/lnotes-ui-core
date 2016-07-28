@@ -4,7 +4,6 @@ module LN.UI.Core.Router.Param (
   Params,
   emptyParams,
   lookupParam,
-  fixParams,
   buildParams,
   fromWebRoutesParams,
   updateParams_Offset,
@@ -56,11 +55,6 @@ sanitizeWebRoutesParams m_params = catMaybes $ map mapParam m_params
 
 fromWebRoutesParams :: [(Text, Maybe Text)] -> [(ParamTag, Param)]
 fromWebRoutesParams = catMaybes . map paramFromKV_ . sanitizeWebRoutesParams
-
-
-
-fixParams :: Params -> Params
-fixParams = id
 
 
 

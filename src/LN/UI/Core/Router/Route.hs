@@ -20,34 +20,28 @@ module LN.UI.Core.Router.Route (
 
 
 
-import           Control.Applicative        ((*>), (<$), (<$>), (<*), (<*>),
-                                             (<|>))
+import           Control.Applicative        ((*>), (<$), (<$>), (<*>), (<|>))
 import           Control.DeepSeq            (NFData)
 import           Data.ByteString.Char8      (ByteString)
 import qualified Data.ByteString.Char8      as BSC
 import           Data.Either                (Either (..))
-import           Data.Map                   (Map)
 import qualified Data.Map                   as Map
-import           Data.Maybe                 (Maybe (..), maybe)
+import           Data.Maybe                 (Maybe (Just))
 import           Data.Monoid                (mempty, (<>))
 import           Data.Text                  (Text)
-import qualified Data.Text                  as Text (concat, unpack)
-import           Data.Tuple                 (fst)
-import           Prelude                    (Eq, Show, fmap, map, pure, show,
-                                             ($), (.), (==))
+import           Prelude                    (Eq, Int, Show, fmap, map, pure,
+                                             ($), (.))
 import           Text.Parsec.Prim           (try)
 import           Web.Routes
 
 import           Haskell.Api.Helpers.Shared (qp)
 import           LN.T
-import           LN.UI.Core.Helpers.GHCJS        (JSString, textToJSString')
-import           LN.UI.Core.Router.CRUD          (CRUD (..))
-import           LN.UI.Core.Router.Crumb         (HasCrumb, crumb)
-import           LN.UI.Core.Router.LinkName      (HasLinkName, linkName)
-import           LN.UI.Core.Router.Param         (Params, buildParams, emptyParams,
-                                             fixParams, fromWebRoutesParams)
-import           LN.UI.Core.Router.Util          (slash)
-import           LN.UI.Core.Types                (Array, Int, String, Tuple, tuple)
+import           LN.UI.Core.Helpers.GHCJS   (JSString, textToJSString')
+import           LN.UI.Core.Router.CRUD     (CRUD (..))
+import           LN.UI.Core.Router.Crumb    (HasCrumb, crumb)
+import           LN.UI.Core.Router.LinkName (HasLinkName, linkName)
+import           LN.UI.Core.Router.Param    (Params, buildParams,
+                                             fromWebRoutesParams)
 
 
 
@@ -83,8 +77,8 @@ fromRouteWithHash = textToJSString' . ("#" <>) <$> fromRouteWith
 toRouteWith :: ByteString -> RouteWith
 toRouteWith url =
   case (fromPathInfoParams url) of
-    Left err            -> routeWith' NotFound
-    Right (url, params) -> routeWith url $ fromWebRoutesParams params
+    Left _              -> routeWith' NotFound
+    Right (url_, params) -> routeWith url_ $ fromWebRoutesParams params
 
 
 
@@ -156,7 +150,7 @@ instance HasLinkName Route where
 
 
 instance HasLinkName RouteWith where
-  linkName (RouteWith route params) = linkName route
+  linkName (RouteWith route _) = linkName route
 
 
 
@@ -172,7 +166,7 @@ instance HasCrumb Route where
 
        Organizations Index             -> []
        Organizations New               -> [Organizations Index]
-       Organizations (ShowS org_sid)   -> [Organizations Index]
+       Organizations (ShowS _)         -> [Organizations Index]
        Organizations (EditS org_sid)   -> organizations_repetitive org_sid
        Organizations (DeleteS org_sid) -> organizations_repetitive org_sid
 
@@ -183,16 +177,6 @@ instance HasCrumb Route where
     organizations_repetitive org_sid =
       [ Organizations Index
       , Organizations (ShowS org_sid) ]
-
-
-
-prep :: Text -> [Text]
-prep route = pure $ "#/" <> route
-
-
-
-preps :: Text -> Text
-preps = Text.concat . prep
 
 
 
