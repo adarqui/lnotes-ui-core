@@ -19,11 +19,11 @@ import           LN.UI.Core.State
 
 type CoreM m = RWST CoreReader CoreWriter CoreState m
 
-type CoreReader = ()
+type CoreReader = ImmutableStore
 type CoreWriter = ()
 type CoreState  = Store
 
 
 
 runCoreM :: forall m a. MonadIO m => CoreState -> CoreM m a -> m (a, CoreState, CoreWriter)
-runCoreM st act = runRWST act () st
+runCoreM st act = runRWST act defaultImmutableStore st

@@ -6,23 +6,26 @@
 
 module LN.UI.Core.State.Internal (
   Store (..),
+  defaultStore,
+  ImmutableStore (..),
+  defaultImmutableStore,
   Action (..)
 ) where
 
 
 
-import           Control.DeepSeq          (NFData)
-import           Data.Int                 (Int64)
-import           Data.Map                 (Map)
-import qualified Data.Map                 as Map
-import           Data.Typeable            (Typeable)
-import           GHC.Generics             (Generic)
+import           Control.DeepSeq            (NFData)
+import           Data.Int                   (Int64)
+import           Data.Map                   (Map)
+import qualified Data.Map                   as Map
+import           Data.Typeable              (Typeable)
+import           GHC.Generics               (Generic)
+import           Haskell.Api.Helpers
+import           Haskell.Api.Helpers.Shared
 
 import           LN.T
-import           LN.T.Pack.Sanitized.User (UserSanitizedPackResponse (..))
-import           LN.T.User                (UserResponse (..))
-import           LN.UI.Core.Loader        (Loader (..))
-import           LN.UI.Core.Router        (Route (..), RouteWith, routeWith')
+import           LN.UI.Core.Loader          (Loader (..))
+import           LN.UI.Core.Router          (Route (..), RouteWith, routeWith')
 import           LN.UI.Core.Types
 
 
@@ -42,15 +45,6 @@ data Store = Store {
 
 
 
-data Action
-  = Init
-  | SetRoute RouteWith
-  | SyncUsers [Int64]
-  | Nop
-  deriving (Show, Typeable, Generic, NFData)
-
-
-
 defaultStore :: Store
 defaultStore = Store {
       _route           = routeWith' Home
@@ -64,3 +58,25 @@ defaultStore = Store {
     , _l_threads       = Loaded Map.empty
     , _l_posts         = Loaded Map.empty
     }
+
+
+
+data ImmutableStore = ImmutableStore {
+    _apiOptions :: ApiOptions SpecificApiOptions
+  } deriving (Typeable, Generic)
+
+
+
+defaultImmutableStore :: ImmutableStore
+defaultImmutableStore = ImmutableStore {
+  _apiOptions = (defaultApiOptions :: ApiOptions SpecificApiOptions)
+}
+
+
+
+data Action
+  = Init
+  | SetRoute RouteWith
+  | SyncUsers [Int64]
+  | Nop
+  deriving (Show, Typeable, Generic, NFData)
