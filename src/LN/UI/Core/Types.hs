@@ -23,7 +23,9 @@ module LN.UI.Core.Types (
   BoardId,
   ThreadId,
   ThreadPostId,
-  limitInt
+  limitInt,
+  View,
+  View_
 ) where
 
 
@@ -71,3 +73,8 @@ type ThreadPostId   = Int64
 
 limitInt :: Int -> Param
 limitInt = Limit . fromIntegral
+
+
+
+type View a = forall m. (Monad m, Monoid (m a)) => m a
+type View_  = View ()

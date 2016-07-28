@@ -1,5 +1,5 @@
 name:                ln-ui-core
-version:             0.1.0.1
+version:             0.1.0.2
 synopsis:            Core routines for ln-ui-*
 description:         Please see README.md
 homepage:            https://github.com/adarqui/ln-ui-core#readme
@@ -16,10 +16,11 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     LN.UI.Core
-                       LN.UI.Core.Types
+                       LN.UI.Core.Access
                        LN.UI.Core.PageInfo
                        LN.UI.Core.PageNumbers
                        LN.UI.Core.Sort
+                       LN.UI.Core.Types
                        LN.UI.Core.Helpers.DataInt
                        LN.UI.Core.Helpers.DataList
                        LN.UI.Core.Helpers.DataText
