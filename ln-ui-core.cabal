@@ -17,6 +17,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     LN.UI.Core
                        LN.UI.Core.Access
+                       LN.UI.Core.Loader
                        LN.UI.Core.PageInfo
                        LN.UI.Core.PageNumbers
                        LN.UI.Core.Sort
