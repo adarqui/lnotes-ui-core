@@ -10,6 +10,9 @@ module LN.UI.Core.Control (
   , runCoreM
   , refeed
   , final
+  , apply
+  , applyRefeed
+  , applyFinal
   , unit
 ) where
 
@@ -33,19 +36,37 @@ type CoreState  = Store
 
 
 
-data CoreResult
+data CoreResult a
   = Final
   | Refeed
+  | Apply (a -> a)
+  | ApplyRefeed (a -> a)
+  | ApplyFinal (a -> a)
   deriving (Generic, Typeable)
 
 
-refeed :: Monad m => m CoreResult
+refeed :: Monad m => m (CoreResult a)
 refeed = pure Refeed
 
 
 
-final :: Monad m => m CoreResult
+final :: Monad m => m (CoreResult a)
 final = pure Final
+
+
+
+apply :: Monad m => (a -> a) -> m (CoreResult a)
+apply a = pure (Apply a)
+
+
+
+applyRefeed :: Monad m => (a -> a) -> m (CoreResult a)
+applyRefeed a = pure (ApplyRefeed a)
+
+
+
+applyFinal :: Monad m => (a -> a) -> m (CoreResult a)
+applyFinal a = pure (ApplyFinal a)
 
 
 
@@ -54,7 +75,7 @@ unit = pure ()
 
 
 
-runCoreM :: forall m. MonadIO m => CoreState -> CoreM m CoreResult -> m (CoreResult, CoreState)
+runCoreM :: forall m. MonadIO m => CoreState -> CoreM m (CoreResult CoreState) -> m (CoreResult CoreState, CoreState)
 runCoreM st act = do
   (result, st, _) <- runRWST act defaultImmutableStore st
   pure (result, st)

@@ -83,6 +83,6 @@ data Action
   = Init
   | Route RouteWith
   | SyncUsers [Int64]
-  | SetState Store
+  | ApplyState (Store -> Store)
   | Nop
   deriving (Typeable, Generic, NFData)
