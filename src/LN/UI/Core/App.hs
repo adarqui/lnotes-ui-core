@@ -78,7 +78,7 @@ runCore st core_result action = runCoreM st $ do
     RouteWith (Organizations (EditS org_sid)) _   -> basedOn (load_organization org_sid) (fetch_organization org_sid)
     RouteWith (Organizations (DeleteS org_sid)) _ -> basedOn (load_organization org_sid) (fetch_organization org_sid)
 
-    RouteWith (OrganizationsForums org_sid Index) _  -> basedOn (load_forums_index org_sid) (fetch_forums_index org_sid)
+    RouteWith (OrganizationsForums org_sid Index) _  -> basedOn (load_organizations_forums_index org_sid) (fetch_organizations_forums_index org_sid)
 
     RouteWith (Users Index) _              -> basedOn load_users_index fetch_users_index
     RouteWith (Users (ShowS user_sid)) _   -> final
@@ -157,7 +157,7 @@ runCore st core_result action = runCoreM st $ do
 
     load_forums_index _ = modify (\st'->st'{_l_forums = Loading}) *> refeed
 
-    cantLoad_forums_index = applyFinal (\st'->st'{_l_forums = CantLoad})
+    cantLoad_forums_index = applyCore (\st'->st'{_l_forums = CantLoad})
 
     fetch_forums_index org_sid = do
       lr <- runEitherT $ do
@@ -166,7 +166,24 @@ runCore st core_result action = runCoreM st $ do
         forums       <- mustPassT $ api $ getForumPacks_ByOrganizationId' organizationPackResponseOrganizationId
         pure (organization, forums)
       rehtie lr (const cantLoad_forums_index) $ \(organization, forums) -> do
-        applyFinal (\st'->st'{
+        applyCore (\st'->st'{
           _l_m_organization = Loaded $ Just organization
         , _l_forums         = Loaded $ idmapFrom forumPackResponseForumId (forumPackResponses forums)
         })
+
+
+
+    load_organizations_forums_index org_sid = do
+      f_org <- load_organization org_sid
+      f_forums <- load_forums_index org_sid
+      pure f_org
+
+    cantLoad_organizations_forums_index = do
+      f_org <- cantLoad_organization
+      f_forums <- cantLoad_forums_index
+      pure f_org
+
+    fetch_organizations_forums_index org_sid = do
+      f_org <- fetch_organization org_sid
+      f_forums <- fetch_forums_index org_sid
+      pure f_org

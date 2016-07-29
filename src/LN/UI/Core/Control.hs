@@ -13,6 +13,8 @@ module LN.UI.Core.Control (
   , apply
   , applyRefeed
   , applyFinal
+  , applyCore
+  , applyCoreFinal
   , unit
 ) where
 
@@ -72,6 +74,20 @@ applyFinal a = pure (ApplyFinal a)
 
 unit :: Monad m => m ()
 unit = pure ()
+
+
+
+applyCore :: Monad m => (CoreState -> CoreState) -> CoreM m (CoreResult CoreState)
+applyCore f = do
+  modify f
+  pure (Apply f)
+
+
+
+applyCoreFinal :: Monad m => (CoreState -> CoreState) -> CoreM m (CoreResult CoreState)
+applyCoreFinal f = do
+  modify f
+  pure (ApplyFinal f)
 
 
 
