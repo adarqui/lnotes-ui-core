@@ -76,7 +76,7 @@ defaultImmutableStore = ImmutableStore {
 
 data Action
   = Init
-  | SetRoute RouteWith
+  | Route RouteWith
   | SyncUsers [Int64]
   | Nop
   deriving (Show, Typeable, Generic, NFData)

@@ -17,6 +17,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     LN.UI.Core
                        LN.UI.Core.Access
+                       LN.UI.Core.Api
                        LN.UI.Core.App
                        LN.UI.Core.Control
                        LN.UI.Core.Loader
@@ -56,7 +57,9 @@ library
                      , tuple
                      , web-routes == 99.99
                      , haskell-api-helpers-shared
+                     , haskell-ebyam
                      , haskell-ln-types
+                     , haskell-rehtie
   if impl(ghcjs)
     build-depends:     ghcjs-ajax, ln-api-ghcjs, haskell-api-helpers-ghcjs
   else
