@@ -64,11 +64,9 @@ library
                      , haskell-rehtie
                      , ln-validate
   if impl(ghcjs)
-    build-depends:     ghcjs-ajax, ln-api-ghcjs, haskell-api-helpers-ghcjs
+    build-depends:     ghcjs-base, ghcjs-ajax, ln-api-ghcjs, haskell-api-helpers-ghcjs
   else
     build-depends:     ln-api, haskell-api-helpers
-  if impl(ghcjs)
-    build-depends:     ghcjs-base
   ghc-options:         -Wall
   default-language:    Haskell2010
 

@@ -1,6 +1,8 @@
 {-# LANGUAGE ExplicitForAll    #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE Rank2Types #-}
+{-# LANGUAGE Rank2Types        #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 module LN.UI.Core.Loader (
   Loader (..),
@@ -19,10 +21,17 @@ module LN.UI.Core.Loader (
 
 
 
+import           Control.DeepSeq (NFData)
+import           Data.Typeable   (Typeable)
+import           GHC.Generics    (Generic)
+
+
+
 data Loader a
   = Loaded a
   | Loading
   | CantLoad
+  deriving (Generic, Typeable, NFData)
 
 
 

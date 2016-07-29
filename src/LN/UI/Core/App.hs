@@ -35,23 +35,36 @@ runCore
   -> Action                    -- ^ The action we are operating one
   -> m (CoreResult, CoreState) -- ^ The newly computed route & state
 
+runCore _ _ (SetState st)     = pure (Final, st)
 runCore st core_result action = runCoreM st $ do
   case action of
-    Init             -> do
-      act_init
-      route_with <- gets _route
-      act_route route_with
+    Init             -> basedOn load_init act_init
     Route route_with -> act_route route_with
     _ -> final
 
   where
 
+  basedOn final_ refeed_ = case core_result of
+    Final  -> final_
+    Refeed -> refeed_
+
+
+
   act_init = do
+    fetch_init
+
+  fetch_init = do
     lr <- api getMe'
     rehtie
       lr
-      (const unit)
-      $ \user_pack -> modify (\st_->st_{_m_me = Just user_pack})
+      (const cantLoad_init)
+      $ \user_pack -> modify (\st_->st_{_l_m_me = Loaded $ Just user_pack}) *> final
+
+  load_init = modify (\st'->st'{_l_m_me = Loading}) *> refeed
+
+  cantLoad_init = modify (\st'->st'{_l_m_me = CantLoad}) *> final
+
+
 
   act_route route_with = case route_with of
     RouteWith Home _ -> final
@@ -68,10 +81,6 @@ runCore st core_result action = runCoreM st $ do
     page_info           = pageInfoFromParams params
     params_list         = paramsFromPageInfo page_info
     new_page_info count = runPageInfo count page_info
-
-    basedOn final_ refeed_ = case core_result of
-      Final  -> final_
-      Refeed -> refeed_
 
     load_organizations_new = modify (\st'->st'{_l_m_organizationRequest = Loaded (Just defaultOrganizationRequest)}) *> final
 

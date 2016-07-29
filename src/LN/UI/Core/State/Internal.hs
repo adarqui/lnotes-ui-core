@@ -34,7 +34,7 @@ import           LN.UI.Core.Types
 data Store = Store {
       _route                   :: RouteWith
     , _pageInfo                :: PageInfo
-    , _m_me                    :: Maybe UserResponse
+    , _l_m_me                  :: Loader (Maybe UserResponse)
     , _meId                    :: UserId
     , _usersCache              :: Map UserId UserSanitizedPackResponse
     , _l_organizations         :: Loader (Map OrganizationId OrganizationPackResponse)
@@ -44,24 +44,24 @@ data Store = Store {
     , _l_threads               :: Loader (Map ThreadId ThreadPackResponse)
     , _l_posts                 :: Loader (Map ThreadId ThreadPostPackResponse)
     , _l_m_organizationRequest :: Loader (Maybe OrganizationRequest)
-    } deriving (Typeable, Generic)
+    } deriving (Typeable, Generic, NFData)
 
 
 
 defaultStore :: Store
 defaultStore = Store {
-      _route           = routeWith' Home
-    , _pageInfo        = defaultPageInfo
-    , _m_me            = Nothing
-    , _meId            = 0
-    , _usersCache      = Map.empty
-    , _l_organizations = Loaded Map.empty
-    , _l_users         = Loaded Map.empty
-    , _l_forums        = Loaded Map.empty
-    , _l_boards        = Loaded Map.empty
-    , _l_threads       = Loaded Map.empty
-    , _l_posts         = Loaded Map.empty
-    , _l_m_organizationRequest = Loaded Nothing
+        _route                   = routeWith' Home
+      , _pageInfo                = defaultPageInfo
+      , _l_m_me                  = Loaded Nothing
+      , _meId                    = 0
+      , _usersCache              = Map.empty
+      , _l_organizations         = Loaded Map.empty
+      , _l_users                 = Loaded Map.empty
+      , _l_forums                = Loaded Map.empty
+      , _l_boards                = Loaded Map.empty
+      , _l_threads               = Loaded Map.empty
+      , _l_posts                 = Loaded Map.empty
+      , _l_m_organizationRequest = Loaded Nothing
     }
 
 
@@ -83,5 +83,6 @@ data Action
   = Init
   | Route RouteWith
   | SyncUsers [Int64]
+  | SetState Store
   | Nop
-  deriving (Show, Typeable, Generic, NFData)
+  deriving (Typeable, Generic, NFData)
