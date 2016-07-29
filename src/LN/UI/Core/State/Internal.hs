@@ -43,7 +43,17 @@ data Store = Store {
     , _l_boards                :: Loader (Map BoardId BoardPackResponse)
     , _l_threads               :: Loader (Map ThreadId ThreadPackResponse)
     , _l_posts                 :: Loader (Map ThreadId ThreadPostPackResponse)
+    , _l_m_organization        :: Loader (Maybe OrganizationPackResponse)
     , _l_m_organizationRequest :: Loader (Maybe OrganizationRequest)
+    , _l_m_user                :: Loader (Maybe UserPackResponse)
+    , _l_m_forum               :: Loader (Maybe ForumPackResponse)
+    , _l_m_forumRequest        :: Loader (Maybe ForumRequest)
+    , _l_m_board               :: Loader (Maybe BoardPackResponse)
+    , _l_m_boardRequest        :: Loader (Maybe BoardRequest)
+    , _l_m_thread              :: Loader (Maybe ThreadPackResponse)
+    , _l_m_threadRequest       :: Loader (Maybe ThreadRequest)
+    , _l_m_threadPost          :: Loader (Maybe ThreadPostPackResponse)
+    , _l_m_threadPostRequest   :: Loader (Maybe ThreadPostRequest)
     } deriving (Typeable, Generic, NFData)
 
 
@@ -61,7 +71,17 @@ defaultStore = Store {
       , _l_boards                = Loaded Map.empty
       , _l_threads               = Loaded Map.empty
       , _l_posts                 = Loaded Map.empty
+      , _l_m_organization        = Loaded Nothing
       , _l_m_organizationRequest = Loaded Nothing
+      , _l_m_user                = Loaded Nothing
+      , _l_m_forum               = Loaded Nothing
+      , _l_m_forumRequest        = Loaded Nothing
+      , _l_m_board               = Loaded Nothing
+      , _l_m_boardRequest        = Loaded Nothing
+      , _l_m_thread              = Loaded Nothing
+      , _l_m_threadRequest       = Loaded Nothing
+      , _l_m_threadPost          = Loaded Nothing
+      , _l_m_threadPostRequest   = Loaded Nothing
     }
 
 
