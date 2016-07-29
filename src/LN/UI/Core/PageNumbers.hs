@@ -6,15 +6,13 @@
 
 module LN.UI.Core.PageNumbers (
   pageRange,
-  buildPages,
-  runPageInfo
+  buildPages
 ) where
 
 
 
 import           Data.Int            (Int64)
 
-import           LN.T.Count          (CountResponse (..), CountResponses (..))
 import           LN.UI.Core.PageInfo (PageInfo (..))
 import           LN.UI.Core.Router   (RouteWith (..))
 
@@ -49,15 +47,3 @@ buildPages page_info@PageInfo{..} _ =
   where
   prev = let p = (currentPage - 1) in if p < 1 then 1 else p
   next = let p = (currentPage + 1) in if (p > totalPages) then totalPages else p
-
-
-
-runPageInfo :: CountResponses -> PageInfo -> PageInfo
-runPageInfo CountResponses{..} page_info =
-  case countResponses of
-    (CountResponse{..}:[]) ->
-      page_info {
-        totalResults = countResponseN,
-        totalPages   = (countResponseN `div` resultsPerPage page_info)
-      }
-    _      -> page_info

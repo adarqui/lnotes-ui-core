@@ -6,7 +6,8 @@ module LN.UI.Core.PageInfo (
   PageInfo (..),
   defaultPageInfo,
   pageInfoFromParams,
-  paramsFromPageInfo
+  paramsFromPageInfo,
+  runPageInfo
   -- defaultPageInfo,
   -- defaultPageInfo_Users,
   -- defaultPageInfo_Organizations,
@@ -31,7 +32,7 @@ import           GHC.Generics            (Generic)
 import           Prelude                 hiding (maybe)
 
 import           LN.T                    (OrderBy (..), OrderBy (..),
-                                          Param (..), ParamTag (..),
+                                          Param (..), ParamTag (..), CountResponse (..), CountResponses(..),
                                           SortOrderBy (..), SortOrderBy (..))
 import           LN.UI.Core.Router.Param (Params)
 
@@ -104,6 +105,18 @@ paramsFromPageInfo PageInfo{..} =
   , Limit resultsPerPage
   , SortOrder sortOrder, Order order
   ]
+
+
+
+runPageInfo :: CountResponses -> PageInfo -> PageInfo
+runPageInfo CountResponses{..} page_info =
+  case countResponses of
+    (CountResponse{..}:[]) ->
+      page_info {
+        totalResults = countResponseN,
+        totalPages   = (countResponseN `div` resultsPerPage page_info)
+      }
+    _      -> page_info
 
 
 

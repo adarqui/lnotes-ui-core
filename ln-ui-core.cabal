@@ -49,6 +49,7 @@ library
                      , containers
                      , deepseq
                      , data-default
+                     , either
                      , mtl
                      , parsec
                      , text
@@ -58,8 +59,10 @@ library
                      , web-routes == 99.99
                      , haskell-api-helpers-shared
                      , haskell-ebyam
+                     , haskell-either-helpers
                      , haskell-ln-types
                      , haskell-rehtie
+                     , ln-validate
   if impl(ghcjs)
     build-depends:     ghcjs-ajax, ln-api-ghcjs, haskell-api-helpers-ghcjs
   else

@@ -38,11 +38,15 @@ resolver: lts-6.9
 packages:
 - '.'
 - '../ln-api'
+- '../ln-sanitize'
+- '../ln-validate'
 - '../haskell-api-helpers'
 - '../haskell-api-helpers-shared'
 - '../haskell-ln-types'
 - '../haskell-ebyam'
 - '../haskell-rehtie'
+- '../haskell-ifte'
+- '../haskell-either-helpers'
 - '../web-routes'
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)

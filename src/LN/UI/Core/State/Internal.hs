@@ -25,22 +25,25 @@ import           Haskell.Api.Helpers.Shared
 
 import           LN.T
 import           LN.UI.Core.Loader          (Loader (..))
+import           LN.UI.Core.PageInfo        (PageInfo, defaultPageInfo)
 import           LN.UI.Core.Router          (Route (..), RouteWith, routeWith')
 import           LN.UI.Core.Types
 
 
 
 data Store = Store {
-      _route           :: RouteWith
-    , _m_me            :: Maybe UserResponse
-    , _meId            :: UserId
-    , _usersCache      :: Map UserId UserSanitizedPackResponse
-    , _l_organizations :: Loader (Map OrganizationId OrganizationPackResponse)
-    , _l_users         :: Loader (Map UserId UserSanitizedPackResponse)
-    , _l_forums        :: Loader (Map ForumId ForumPackResponse)
-    , _l_boards        :: Loader (Map BoardId BoardPackResponse)
-    , _l_threads       :: Loader (Map ThreadId ThreadPackResponse)
-    , _l_posts         :: Loader (Map ThreadId ThreadPostPackResponse)
+      _route                   :: RouteWith
+    , _pageInfo                :: PageInfo
+    , _m_me                    :: Maybe UserResponse
+    , _meId                    :: UserId
+    , _usersCache              :: Map UserId UserSanitizedPackResponse
+    , _l_organizations         :: Loader (Map OrganizationId OrganizationPackResponse)
+    , _l_users                 :: Loader (Map UserId UserSanitizedPackResponse)
+    , _l_forums                :: Loader (Map ForumId ForumPackResponse)
+    , _l_boards                :: Loader (Map BoardId BoardPackResponse)
+    , _l_threads               :: Loader (Map ThreadId ThreadPackResponse)
+    , _l_posts                 :: Loader (Map ThreadId ThreadPostPackResponse)
+    , _l_m_organizationRequest :: Loader (Maybe OrganizationRequest)
     } deriving (Typeable, Generic)
 
 
@@ -48,6 +51,7 @@ data Store = Store {
 defaultStore :: Store
 defaultStore = Store {
       _route           = routeWith' Home
+    , _pageInfo        = defaultPageInfo
     , _m_me            = Nothing
     , _meId            = 0
     , _usersCache      = Map.empty
@@ -57,6 +61,7 @@ defaultStore = Store {
     , _l_boards        = Loaded Map.empty
     , _l_threads       = Loaded Map.empty
     , _l_posts         = Loaded Map.empty
+    , _l_m_organizationRequest = Loaded Nothing
     }
 
 
