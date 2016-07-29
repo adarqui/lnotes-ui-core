@@ -22,9 +22,9 @@ import           LN.UI.Core.State
 --
 runCore
   :: forall m. MonadIO m
-  => CoreState    -- ^ Our current State
-  -> Action       -- ^ The action we are operating one
-  -> m CoreState  -- ^ The newly computed route & state
+  => CoreState                 -- ^ Our current State
+  -> Action                    -- ^ The action we are operating one
+  -> m (CoreResult, CoreState) -- ^ The newly computed route & state
 
 runCore st action = runCoreM st $ do
   case action of
@@ -33,7 +33,7 @@ runCore st action = runCoreM st $ do
       route_with <- gets _route
       act_route route_with
     Route route_with -> act_route route_with
-    _ -> unit
+    _ -> final
 
   where
 
@@ -45,15 +45,10 @@ runCore st action = runCoreM st $ do
       $ \user_pack -> modify (\st_->st_{_m_me = Just user_pack})
 
   act_route route_with = case route_with of
-    RouteWith Home _ -> unit
-    RouteWith (Organizations New) _ -> unit
-    RouteWith (Organizations Index) params -> unit
-    RouteWith (Organizations (ShowS org_sid)) _ -> unit
-    RouteWith (Organizations (EditS org_sid)) _ -> unit
-    RouteWith (Organizations (DeleteS org_sid)) _ -> unit
-    RouteWith _ _ -> unit
-
-
-
-unit :: Monad m => m ()
-unit = pure ()
+    RouteWith Home _ -> final
+    RouteWith (Organizations New) _ -> final
+    RouteWith (Organizations Index) params -> final
+    RouteWith (Organizations (ShowS org_sid)) _ -> final
+    RouteWith (Organizations (EditS org_sid)) _ -> final
+    RouteWith (Organizations (DeleteS org_sid)) _ -> final
+    RouteWith _ _ -> final
