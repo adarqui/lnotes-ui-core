@@ -74,6 +74,10 @@ runCore st core_result action = runCoreM st $ do
     RouteWith (Organizations (ShowS org_sid)) _ -> final
     RouteWith (Organizations (EditS org_sid)) _ -> final
     RouteWith (Organizations (DeleteS org_sid)) _ -> final
+    RouteWith (Users Index) _ -> basedOn load_users_index fetch_users_index
+    RouteWith (Users (ShowS user_sid)) _ -> final
+    RouteWith (Users (EditS user_sid)) _ -> final
+    RouteWith (Users (DeleteS user_sid)) _ -> final
     RouteWith _ _ -> final
 
     where
@@ -96,7 +100,23 @@ runCore st core_result action = runCoreM st $ do
         pure (count, organizations)
       rehtie lr (const $ cantLoad_organizations_index) $ \(count, organization_packs) -> do
         applyFinal (\st'->st'{
-            _l_organizations = Loaded $ idmapFrom organizationPackResponseOrganizationId (organizationPackResponses
-organization_packs)
+            _l_organizations = Loaded $ idmapFrom organizationPackResponseOrganizationId (organizationPackResponses organization_packs)
+          , _pageInfo = new_page_info count
+          })
+
+
+
+    load_users_index = modify (\st'->st'{_l_users = Loading}) *> refeed
+
+    cantLoad_users_index = applyFinal (\st'->st'{_l_users = CantLoad})
+
+    fetch_users_index = do
+      lr <- runEitherT $ do
+        count <- mustPassT $ api $ getUsersCount'
+        users <- mustPassT $ api $ getUserSanitizedPacks params_list
+        pure (count, users)
+      rehtie lr (const $ cantLoad_users_index) $ \(count, user_packs) -> do
+        applyFinal (\st'->st'{
+            _l_users = Loaded $ idmapFrom userSanitizedPackResponseUserId (userSanitizedPackResponses user_packs)
           , _pageInfo = new_page_info count
           })
