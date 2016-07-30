@@ -151,7 +151,7 @@ runCore st core_result action         = runCoreM st $ do
       next
 
     fetch_organization_show org_sid = do
-      done
+      fetch_organizations_forums_index org_sid
 
 
 
@@ -177,12 +177,13 @@ runCore st core_result action         = runCoreM st $ do
       Store{..} <- get
       case _l_m_organization of
         Loaded (Just organization@OrganizationPackResponse{..}) -> do
-        lr <- api $ getForumPacks_ByOrganizationId' organizationPackResponseOrganizationId
-        rehtie lr (const cantLoad_forums_index) $ \ForumPackResponses{..} -> do
-        modify (\st'->st'{
-          _l_forums = Loaded $ idmapFrom forumPackResponseForumId forumPackResponses
-        })
-        done
+          lr <- api $ getForumPacks_ByOrganizationId' organizationPackResponseOrganizationId
+          rehtie lr (const cantLoad_forums_index) $ \ForumPackResponses{..} -> do
+          modify (\st'->st'{
+            _l_forums = Loaded $ idmapFrom forumPackResponseForumId forumPackResponses
+          })
+          done
+        _ -> cantLoad_forums_index
 
 
 
@@ -199,9 +200,10 @@ runCore st core_result action         = runCoreM st $ do
     fetch_organizations_forums_index org_sid = do
       Store{..} <- get
       case (_l_m_organization, _l_forums) of
-        (Loading, _)        -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next done
-        (Loaded _, Loading) -> fetch_forums_index org_sid >>= \core_result_ -> basedOn_ core_result_ start next done
-        _                   -> cantLoad_organizations_forums_index
+        (Loading, _)         -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next done
+        (Loaded _, Loading)  -> fetch_forums_index org_sid >>= \core_result_ -> basedOn_ core_result_ start next done
+        (Loaded _, Loaded _) -> done
+        _                    -> cantLoad_organizations_forums_index
 
 
 
