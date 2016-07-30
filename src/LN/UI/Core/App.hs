@@ -38,8 +38,8 @@ runCore
   -> m (CoreResult, CoreState) -- ^ The newly computed route & state
 
 runCore st core_result (ApplyState f) = pure (core_result, f st)
-runCore st core_result (MachNext action) = runCore st Next action
-runCore st core_result action = runCoreM st $ do
+runCore st _ (MachNext action)        = runCore st Next action
+runCore st core_result action         = runCoreM st $ do
   case action of
     Init             -> basedOn load_init fetch_init
     Route route_with -> act_route route_with
@@ -51,7 +51,6 @@ runCore st core_result action = runCoreM st $ do
     Start -> start_
     Next  -> next_
     Done  -> done_
-    _     -> error "bleh"
 
   basedOn start_ next_ = basedOn_ core_result start_ next_ done
 
@@ -183,8 +182,8 @@ runCore st core_result action = runCoreM st $ do
 
 
     load_organizations_forums_index org_sid = do
-      load_organization org_sid
-      load_forums_index org_sid
+      void $ load_organization org_sid
+      void $ load_forums_index org_sid
       next
 
     cantLoad_organizations_forums_index = do
@@ -195,7 +194,6 @@ runCore st core_result action = runCoreM st $ do
     fetch_organizations_forums_index org_sid = do
       Store{..} <- get
       case (_l_m_organization, _l_forums) of
-        (Loading, _) -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next done
+        (Loading, _)        -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next done
         (Loaded _, Loading) -> fetch_forums_index org_sid >>= \core_result_ -> basedOn_ core_result_ start next done
-        _ -> done
-      done
+        _                   -> cantLoad_organizations_forums_index
