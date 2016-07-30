@@ -103,11 +103,16 @@ defaultImmutableStore = ImmutableStore {
 
 
 data Action
-  = Init
+  = Nop
+  | Init
   | Route RouteWith
-  | SyncUsers [Int64]
-  | ApplyState (Store -> Store)
-  | MachNext Action
-  | Save
-  | Nop
+
+  | MachNext Action                     -- ^ Used by an ln-ui-* frontend to obtain the next state
+
+  | Save                                -- ^ A global "Save", which uses State & current route to
+                                        -- figure out what we are saving.
+
+  | ApplyState (Store -> Store)         -- ^ used only be ln-ui-* frontends. This is how they can set
+                                        -- the Store state, using the same Action sum type
+
   deriving (Typeable, Generic, NFData)
