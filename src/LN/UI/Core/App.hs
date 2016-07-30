@@ -43,6 +43,7 @@ runCore st core_result action         = runCoreM st $ do
   case action of
     Init             -> basedOn load_init fetch_init
     Route route_with -> act_route route_with
+    Save             -> act_save
     _ -> start
 
   where
@@ -197,3 +198,17 @@ runCore st core_result action         = runCoreM st $ do
         (Loading, _)        -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next done
         (Loaded _, Loading) -> fetch_forums_index org_sid >>= \core_result_ -> basedOn_ core_result_ start next done
         _                   -> cantLoad_organizations_forums_index
+
+
+
+
+  act_save = do
+    route_with <- gets _route
+    case route_with of
+      RouteWith (Organizations _) _ -> act_save_organization
+      RouteWith (Users _) _         -> done
+      RouteWith (OrganizationsForums _ _) _ -> done
+      _ -> done
+
+    where
+    act_save_organization = done

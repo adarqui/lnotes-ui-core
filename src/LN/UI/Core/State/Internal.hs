@@ -108,5 +108,6 @@ data Action
   | SyncUsers [Int64]
   | ApplyState (Store -> Store)
   | MachNext Action
+  | Save
   | Nop
   deriving (Typeable, Generic, NFData)
