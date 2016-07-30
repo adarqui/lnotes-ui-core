@@ -104,5 +104,6 @@ data Action
   | Route RouteWith
   | SyncUsers [Int64]
   | ApplyState (Store -> Store)
+  | MachNext Action
   | Nop
   deriving (Typeable, Generic, NFData)

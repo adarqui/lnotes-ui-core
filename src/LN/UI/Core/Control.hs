@@ -8,13 +8,9 @@ module LN.UI.Core.Control (
   , CoreWriter
   , CoreState
   , runCoreM
-  , refeed
-  , final
-  , apply
-  , applyRefeed
-  , applyFinal
-  , applyCore
-  , applyCoreFinal
+  , start
+  , next
+  , done
   , unit
 ) where
 
@@ -38,37 +34,26 @@ type CoreState  = Store
 
 
 
-data CoreResult a
-  = Final
-  | Refeed
-  | Apply (a -> a)
-  | ApplyRefeed (a -> a)
-  | ApplyFinal (a -> a)
+data CoreResult
+  = Start
+  | Next
+  | Done
   deriving (Generic, Typeable)
 
 
-refeed :: Monad m => m (CoreResult a)
-refeed = pure Refeed
+
+start :: Monad m => m CoreResult
+start = pure Start
 
 
 
-final :: Monad m => m (CoreResult a)
-final = pure Final
+next :: Monad m => m CoreResult
+next = pure Next
 
 
 
-apply :: Monad m => (a -> a) -> m (CoreResult a)
-apply a = pure (Apply a)
-
-
-
-applyRefeed :: Monad m => (a -> a) -> m (CoreResult a)
-applyRefeed a = pure (ApplyRefeed a)
-
-
-
-applyFinal :: Monad m => (a -> a) -> m (CoreResult a)
-applyFinal a = pure (ApplyFinal a)
+done :: Monad m => m CoreResult
+done = pure Done
 
 
 
@@ -77,21 +62,7 @@ unit = pure ()
 
 
 
-applyCore :: Monad m => (CoreState -> CoreState) -> CoreM m (CoreResult CoreState)
-applyCore f = do
-  modify f
-  pure (Apply f)
-
-
-
-applyCoreFinal :: Monad m => (CoreState -> CoreState) -> CoreM m (CoreResult CoreState)
-applyCoreFinal f = do
-  modify f
-  pure (ApplyFinal f)
-
-
-
-runCoreM :: forall m. MonadIO m => CoreState -> CoreM m (CoreResult CoreState) -> m (CoreResult CoreState, CoreState)
+runCoreM :: forall m. MonadIO m => CoreState -> CoreM m CoreResult -> m (CoreResult, CoreState)
 runCoreM st act = do
   (result, st, _) <- runRWST act defaultImmutableStore st
   pure (result, st)
