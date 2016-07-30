@@ -115,4 +115,7 @@ data Action
   | ApplyState (Store -> Store)         -- ^ used only be ln-ui-* frontends. This is how they can set
                                         -- the Store state, using the same Action sum type
 
+  | Goto RouteWith                      -- ^ used only by ln-ui-* frontends. This should change the
+                                        -- current route, directory, etc.
+
   deriving (Typeable, Generic, NFData)
