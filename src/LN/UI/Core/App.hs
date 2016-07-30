@@ -145,9 +145,13 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
-    load_organization_show org_sid = done
+    load_organization_show org_sid = do
+      void $ load_organization org_sid
+      void $ load_forums_index org_sid
+      next
 
-    fetch_organization_show org_sid = done
+    fetch_organization_show org_sid = do
+      done
 
 
 
@@ -156,9 +160,7 @@ runCore st core_result action         = runCoreM st $ do
     cantLoad_organization = modify (\st'->st'{_l_m_organization = CantLoad}) *> done
 
     fetch_organization org_sid = do
-      lr <- runEitherT $ do
-        organization <- mustPassT $ api $ ApiS.getOrganizationPack' org_sid
-        pure organization
+      lr <- api $ ApiS.getOrganizationPack' org_sid
       rehtie lr (const $ cantLoad_organization) $ \organization -> do
         modify (\st'->st'{
           _l_m_organization = Loaded $ Just organization
@@ -172,15 +174,13 @@ runCore st core_result action         = runCoreM st $ do
     cantLoad_forums_index = modify (\st'->st'{_l_forums = CantLoad}) *> done
 
     fetch_forums_index org_sid = do
-      lr <- runEitherT $ do
-        organization <- mustPassT $ api $ ApiS.getOrganizationPack' org_sid
-        let OrganizationPackResponse{..} =  organization
-        forums       <- mustPassT $ api $ getForumPacks_ByOrganizationId' organizationPackResponseOrganizationId
-        pure (organization, forums)
-      rehtie lr (const cantLoad_forums_index) $ \(organization, forums) -> do
+      Store{..} <- get
+      case _l_m_organization of
+        Loaded (Just organization@OrganizationPackResponse{..}) -> do
+        lr <- api $ getForumPacks_ByOrganizationId' organizationPackResponseOrganizationId
+        rehtie lr (const cantLoad_forums_index) $ \ForumPackResponses{..} -> do
         modify (\st'->st'{
-          _l_m_organization = Loaded $ Just organization
-        , _l_forums         = Loaded $ idmapFrom forumPackResponseForumId (forumPackResponses forums)
+          _l_forums = Loaded $ idmapFrom forumPackResponseForumId forumPackResponses
         })
         done
 
