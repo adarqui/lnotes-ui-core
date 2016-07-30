@@ -83,9 +83,9 @@ runCore st core_result action         = runCoreM st $ do
 
     RouteWith (Organizations New) _               -> load_organizations_new *> done
     RouteWith (Organizations Index) _             -> basedOn load_organizations_index fetch_organizations_index
-    RouteWith (Organizations (ShowS org_sid)) _   -> basedOn (load_organization_show org_sid) (fetch_organization_show org_sid)
-    RouteWith (Organizations (EditS org_sid)) _   -> basedOn (load_organization org_sid) (fetch_organization org_sid)
-    RouteWith (Organizations (DeleteS org_sid)) _ -> basedOn (load_organization org_sid) (fetch_organization org_sid)
+    RouteWith (Organizations (ShowS org_sid)) _   -> basedOn load_organization_show (fetch_organization_show org_sid)
+    RouteWith (Organizations (EditS org_sid)) _   -> basedOn load_organization (fetch_organization org_sid)
+    RouteWith (Organizations (DeleteS org_sid)) _ -> basedOn load_organization (fetch_organization org_sid)
 
     RouteWith (OrganizationsForums org_sid Index) _  -> basedOn (load_organizations_forums_index org_sid) (fetch_organizations_forums_index org_sid)
 
@@ -136,7 +136,7 @@ runCore st core_result action         = runCoreM st $ do
         count <- mustPassT $ api $ getUsersCount'
         users <- mustPassT $ api $ getUserSanitizedPacks params_list
         pure (count, users)
-      rehtie lr (const $ cantLoad_users_index) $ \(count, user_packs) -> do
+      rehtie lr (const cantLoad_users_index) $ \(count, user_packs) -> do
         modify (\st'->st'{
             _l_users = Loaded $ idmapFrom userSanitizedPackResponseUserId (userSanitizedPackResponses user_packs)
           , _pageInfo = new_page_info count
@@ -145,9 +145,9 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
-    load_organization_show org_sid = do
-      void $ load_organization org_sid
-      void $ load_forums_index org_sid
+    load_organization_show = do
+      void load_organization
+      void load_forums_index
       next
 
     fetch_organization_show org_sid = do
@@ -155,13 +155,13 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
-    load_organization org_sid = modify (\st'->st'{_l_m_organization = Loading}) *> next
+    load_organization = modify (\st'->st'{_l_m_organization = Loading}) *> next
 
     cantLoad_organization = modify (\st'->st'{_l_m_organization = CantLoad}) *> done
 
     fetch_organization org_sid = do
       lr <- api $ ApiS.getOrganizationPack' org_sid
-      rehtie lr (const $ cantLoad_organization) $ \organization -> do
+      rehtie lr (const cantLoad_organization) $ \organization -> do
         modify (\st'->st'{
           _l_m_organization = Loaded $ Just organization
         })
@@ -169,7 +169,7 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
-    load_forums_index _ = modify (\st'->st'{_l_forums = Loading}) *> next
+    load_forums_index = modify (\st'->st'{_l_forums = Loading}) *> next
 
     cantLoad_forums_index = modify (\st'->st'{_l_forums = CantLoad}) *> done
 
@@ -187,13 +187,13 @@ runCore st core_result action         = runCoreM st $ do
 
 
     load_organizations_forums_index org_sid = do
-      void $ load_organization org_sid
-      void $ load_forums_index org_sid
+      void load_organization
+      void load_forums_index
       next
 
     cantLoad_organizations_forums_index = do
-      void $ cantLoad_organization
-      void $ cantLoad_forums_index
+      void cantLoad_organization
+      void cantLoad_forums_index
       done
 
     fetch_organizations_forums_index org_sid = do
