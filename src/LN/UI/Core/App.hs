@@ -34,7 +34,7 @@ runCore
   :: forall m. MonadIO m
   => CoreState                 -- ^ Our current State
   -> CoreResult                -- ^ We fetch data differently based on CoreResult
-  -> Action                    -- ^ The action we are operating one
+  -> Action                    -- ^ The action we are operating on
   -> m (CoreResult, CoreState) -- ^ The newly computed route & state
 
 runCore st core_result (ApplyState f) = pure (core_result, f st)
