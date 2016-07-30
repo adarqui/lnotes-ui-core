@@ -1,5 +1,5 @@
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE RankNTypes    #-}
 
 module LN.UI.Core.Control (
     CoreM
@@ -18,10 +18,11 @@ module LN.UI.Core.Control (
 
 import           Control.Monad.IO.Class  (MonadIO)
 import           Control.Monad.Trans.RWS
-import Data.Tuple.Select (sel2)
-import GHC.Generics (Generic)
-import Data.Typeable (Typeable)
+import           Data.Tuple.Select       (sel2)
+import           Data.Typeable           (Typeable)
+import           GHC.Generics            (Generic)
 
+import           LN.UI.Core.Router.Route
 import           LN.UI.Core.State
 
 
@@ -38,6 +39,8 @@ data CoreResult
   = Start
   | Next
   | Done
+  | Error
+  | Reroute RouteWith
   deriving (Generic, Typeable)
 
 

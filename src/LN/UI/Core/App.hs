@@ -211,4 +211,12 @@ runCore st core_result action         = runCoreM st $ do
       _ -> done
 
     where
-    act_save_organization = done
+    act_save_organization = do
+      Store{..} <- get
+      case _m_organizationRequest of
+        Nothing -> done
+        Just request -> do
+          lr <- api $ postOrganization' request
+          rehtie lr (const done) $ \organization@OrganizationResponse{..} -> do
+            liftIO $ print "org"
+            done
