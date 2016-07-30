@@ -37,6 +37,7 @@ runCore
   -> Action                    -- ^ The action we are operating one
   -> m (CoreResult, CoreState) -- ^ The newly computed route & state
 
+runCore st core_result (ApplyState f) = pure (core_result, f st)
 runCore st core_result (MachNext action) = runCore st Next action
 runCore st core_result action = runCoreM st $ do
   case action of
@@ -76,7 +77,7 @@ runCore st core_result action = runCoreM st $ do
     RouteWith About _  -> start
     RouteWith Portal _ -> start
 
-    RouteWith (Organizations New) _               -> load_organizations_new
+    RouteWith (Organizations New) _               -> load_organizations_new *> done
     RouteWith (Organizations Index) _             -> basedOn load_organizations_index fetch_organizations_index
     RouteWith (Organizations (ShowS org_sid)) _   -> basedOn (load_organization_show org_sid) (fetch_organization_show org_sid)
     RouteWith (Organizations (EditS org_sid)) _   -> basedOn (load_organization org_sid) (fetch_organization org_sid)
@@ -100,7 +101,7 @@ runCore st core_result action = runCoreM st $ do
 
 
 
-    load_organizations_new = modify (\st'->st'{_l_m_organizationRequest = Loaded (Just defaultOrganizationRequest)}) *> next
+    load_organizations_new = modify (\st'->st'{_m_organizationRequest = Just defaultOrganizationRequest}) *> next
 
 
 
