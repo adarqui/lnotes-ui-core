@@ -62,7 +62,7 @@ data Store = Store {
 
 defaultStore :: Store
 defaultStore = Store {
-        _route                   = routeWith' Home
+        _route                    = routeWith' Home
       , _pageInfo                 = defaultPageInfo
       , _l_m_me                   = Loaded Nothing
       , _meId                     = 0

@@ -49,9 +49,11 @@ runCore st core_result action         = runCoreM st $ do
   where
 
   basedOn_ core_result_ start_ next_ done_ = case core_result_ of
-    Start -> start_
-    Next  -> next_
-    Done  -> done_
+    Start     -> start_
+    Next      -> next_
+    Done      -> done_
+    Failure   -> failure
+    Reroute r -> reroute r
 
   basedOn start_ next_ = basedOn_ core_result start_ next_ done
 
@@ -213,10 +215,9 @@ runCore st core_result action         = runCoreM st $ do
     where
     act_save_organization = do
       Store{..} <- get
-      case _m_organizationRequest of
-        Nothing -> done
-        Just request -> do
-          lr <- api $ postOrganization' request
+      case (_l_m_me, _m_organizationRequest) of
+        (Loaded (Just UserResponse{..}), Just request) -> do
+          lr <- api $ postOrganization' (request { organizationRequestEmail = userResponseEmail })
           rehtie lr (const done) $ \organization@OrganizationResponse{..} -> do
-            liftIO $ print "org"
-            done
+          reroute (RouteWith (Organizations (ShowS organizationResponseName)) emptyParams)
+        _ ->  done

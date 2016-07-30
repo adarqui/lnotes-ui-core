@@ -11,6 +11,8 @@ module LN.UI.Core.Control (
   , start
   , next
   , done
+  , failure
+  , reroute
   , unit
 ) where
 
@@ -39,7 +41,7 @@ data CoreResult
   = Start
   | Next
   | Done
-  | Error
+  | Failure
   | Reroute RouteWith
   deriving (Generic, Typeable)
 
@@ -57,6 +59,16 @@ next = pure Next
 
 done :: Monad m => m CoreResult
 done = pure Done
+
+
+
+failure :: Monad m => m CoreResult
+failure = pure Failure
+
+
+
+reroute :: Monad m => RouteWith -> m CoreResult
+reroute r = pure $ Reroute r
 
 
 
