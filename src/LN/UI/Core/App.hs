@@ -46,11 +46,13 @@ runCore st core_result action = runCoreM st $ do
 
   where
 
-  basedOn start_ next_ = case core_result of
+  basedOn_ core_result_ start_ next_ done_ = case core_result_ of
     Start -> start_
     Next  -> next_
-    Done  -> done
+    Done  -> done_
     _     -> error "bleh"
+
+  basedOn start_ next_ = basedOn_ core_result start_ next_ done
 
 
 
@@ -76,11 +78,11 @@ runCore st core_result action = runCoreM st $ do
 
     RouteWith (Organizations New) _               -> load_organizations_new
     RouteWith (Organizations Index) _             -> basedOn load_organizations_index fetch_organizations_index
-    -- RouteWith (Organizations (ShowS org_sid)) _   -> basedOn (load_organization_show org_sid) (fetch_organization_show org_sid)
-    -- RouteWith (Organizations (EditS org_sid)) _   -> basedOn (load_organization org_sid) (fetch_organization org_sid)
-    -- RouteWith (Organizations (DeleteS org_sid)) _ -> basedOn (load_organization org_sid) (fetch_organization org_sid)
+    RouteWith (Organizations (ShowS org_sid)) _   -> basedOn (load_organization_show org_sid) (fetch_organization_show org_sid)
+    RouteWith (Organizations (EditS org_sid)) _   -> basedOn (load_organization org_sid) (fetch_organization org_sid)
+    RouteWith (Organizations (DeleteS org_sid)) _ -> basedOn (load_organization org_sid) (fetch_organization org_sid)
 
-    -- RouteWith (OrganizationsForums org_sid Index) _  -> basedOn (load_organizations_forums_index org_sid) (fetch_organizations_forums_index org_sid)
+    RouteWith (OrganizationsForums org_sid Index) _  -> basedOn (load_organizations_forums_index org_sid) (fetch_organizations_forums_index org_sid)
 
     RouteWith (Users Index) _              -> basedOn load_users_index fetch_users_index
     -- RouteWith (Users (ShowS user_sid)) _   -> start
@@ -138,58 +140,61 @@ runCore st core_result action = runCoreM st $ do
 
 
 
-    -- load_organization_show org_sid = start
+    load_organization_show org_sid = done
 
-    -- fetch_organization_show org_sid = start
-
-
-
-    -- load_organization org_sid = modify (\st'->st'{_l_m_organization = Loading}) *> next
-
-    -- cantLoad_organization = modify (\st'->st'{_l_m_organization = CantLoad}) *> next
-
-    -- fetch_organization org_sid = do
-    --   lr <- runEitherT $ do
-    --     organization <- mustPassT $ api $ ApiS.getOrganizationPack' org_sid
-    --     pure organization
-    --   rehtie lr (const $ cantLoad_organization) $ \organization -> do
-    --     modify (\st'->st'{
-    --       _l_m_organization = Loaded $ Just organization
-    --     })
-    --     next
+    fetch_organization_show org_sid = done
 
 
 
-    -- load_forums_index _ = modify (\st'->st'{_l_forums = Loading}) *> next
+    load_organization org_sid = modify (\st'->st'{_l_m_organization = Loading}) *> next
 
-    -- cantLoad_forums_index = modify (\st'->st'{_l_forums = CantLoad})
+    cantLoad_organization = modify (\st'->st'{_l_m_organization = CantLoad}) *> done
 
-    -- fetch_forums_index org_sid = do
-    --   lr <- runEitherT $ do
-    --     organization <- mustPassT $ api $ ApiS.getOrganizationPack' org_sid
-    --     let OrganizationPackResponse{..} =  organization
-    --     forums       <- mustPassT $ api $ getForumPacks_ByOrganizationId' organizationPackResponseOrganizationId
-    --     pure (organization, forums)
-    --   rehtie lr (const cantLoad_forums_index) $ \(organization, forums) -> do
-    --     modify (\st'->st'{
-    --       _l_m_organization = Loaded $ Just organization
-    --     , _l_forums         = Loaded $ idmapFrom forumPackResponseForumId (forumPackResponses forums)
-    --     })
-    --     next
+    fetch_organization org_sid = do
+      lr <- runEitherT $ do
+        organization <- mustPassT $ api $ ApiS.getOrganizationPack' org_sid
+        pure organization
+      rehtie lr (const $ cantLoad_organization) $ \organization -> do
+        modify (\st'->st'{
+          _l_m_organization = Loaded $ Just organization
+        })
+        done
 
 
 
-    -- load_organizations_forums_index org_sid = do
-    --   f_org    <- load_organization org_sid
-    --   f_forums <- load_forums_index org_sid
-    --   next
+    load_forums_index _ = modify (\st'->st'{_l_forums = Loading}) *> next
 
-    -- cantLoad_organizations_forums_index = do
-    --   f_org    <- cantLoad_organization
-    --   f_forums <- cantLoad_forums_index
-    --   next
+    cantLoad_forums_index = modify (\st'->st'{_l_forums = CantLoad}) *> done
 
-    -- fetch_organizations_forums_index org_sid = do
-    --   f_org    <- fetch_organization org_sid
-    --   f_forums <- fetch_forums_index org_sid
-    --   next
+    fetch_forums_index org_sid = do
+      lr <- runEitherT $ do
+        organization <- mustPassT $ api $ ApiS.getOrganizationPack' org_sid
+        let OrganizationPackResponse{..} =  organization
+        forums       <- mustPassT $ api $ getForumPacks_ByOrganizationId' organizationPackResponseOrganizationId
+        pure (organization, forums)
+      rehtie lr (const cantLoad_forums_index) $ \(organization, forums) -> do
+        modify (\st'->st'{
+          _l_m_organization = Loaded $ Just organization
+        , _l_forums         = Loaded $ idmapFrom forumPackResponseForumId (forumPackResponses forums)
+        })
+        done
+
+
+
+    load_organizations_forums_index org_sid = do
+      load_organization org_sid
+      load_forums_index org_sid
+      next
+
+    cantLoad_organizations_forums_index = do
+      void $ cantLoad_organization
+      void $ cantLoad_forums_index
+      done
+
+    fetch_organizations_forums_index org_sid = do
+      Store{..} <- get
+      case (_l_m_organization, _l_forums) of
+        (Loading, _) -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next done
+        (Loaded _, Loading) -> fetch_forums_index org_sid >>= \core_result_ -> basedOn_ core_result_ start next done
+        _ -> done
+      done
