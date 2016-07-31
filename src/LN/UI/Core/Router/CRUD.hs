@@ -17,7 +17,6 @@ import           Data.Text                                (Text)
 import qualified Data.Text                                as Text
 import           Prelude                                  (Bool (..), Eq, Show,
                                                            show, ($))
-import           Text.ParserCombinators.Parsec.Combinator (eof)
 import           Text.ParserCombinators.Parsec.Prim       (try, (<?>))
 import           Web.Routes
 

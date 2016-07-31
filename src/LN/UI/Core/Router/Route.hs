@@ -20,30 +20,34 @@ module LN.UI.Core.Router.Route (
 
 
 
-import           Control.Applicative          ((*>), (<$), (<$>), (<*>), (<|>))
-import           Control.DeepSeq              (NFData)
-import           Data.ByteString.Char8        (ByteString)
-import qualified Data.ByteString.Char8        as BSC
-import           Data.Either                  (Either (..))
-import qualified Data.Map                     as Map
-import           Data.Maybe                   (Maybe (Just))
-import           Data.Monoid                  (mempty, (<>))
-import           Data.Text                    (Text)
-import           Prelude                      (Eq, Int, Show, fmap, map, pure, (>>=),
-                                               ($), (.), (==))
-import           Text.Parsec.Prim             (try, (<?>))
+import           Control.Applicative                      ((*>), (<$), (<$>),
+                                                           (<*>), (<|>))
+import           Control.DeepSeq                          (NFData)
+import           Data.ByteString.Char8                    (ByteString)
+import qualified Data.ByteString.Char8                    as BSC
+import           Data.Either                              (Either (..))
+import qualified Data.Map                                 as Map
+import           Data.Maybe                               (Maybe (Just))
+import           Data.Monoid                              (mempty, (<>))
+import           Data.Text                                (Text)
+import           Prelude                                  (Eq, Int, Show, fmap,
+                                                           map, pure, ($), (.),
+                                                           (==), (>>=))
+import           Text.Parsec.Prim                         (try, (<?>))
 import           Web.Routes
-import Text.ParserCombinators.Parsec.Combinator
 
-import           Haskell.Api.Helpers.Shared   (qp)
+import           Haskell.Api.Helpers.Shared               (qp)
 import           LN.T
-import           LN.UI.Core.Helpers.GHCJS     (JSString, textToJSString')
-import           LN.UI.Core.Helpers.WebRoutes (str1, notCRUD, notCRUDstr1)
-import           LN.UI.Core.Router.CRUD       (CRUD (..))
-import           LN.UI.Core.Router.Crumb      (HasCrumb, crumb)
-import           LN.UI.Core.Router.LinkName   (HasLinkName, linkName)
-import           LN.UI.Core.Router.Param      (Params, buildParams,
-                                               fromWebRoutesParams)
+import           LN.UI.Core.Helpers.GHCJS                 (JSString,
+                                                           textToJSString')
+import           LN.UI.Core.Helpers.WebRoutes             (notCRUD, notCRUDstr1,
+                                                           str1)
+import           LN.UI.Core.Router.CRUD                   (CRUD (..))
+import           LN.UI.Core.Router.Crumb                  (HasCrumb, crumb)
+import           LN.UI.Core.Router.LinkName               (HasLinkName,
+                                                           linkName)
+import           LN.UI.Core.Router.Param                  (Params, buildParams,
+                                                           fromWebRoutesParams)
 
 
 

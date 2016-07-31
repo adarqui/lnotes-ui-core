@@ -63,8 +63,12 @@ spec = do
       fromPathInfo "/ln/f/_delete/community"   `shouldBe` (Right $ OrganizationsForums "ln" (DeleteS "community"))
       fromPathInfo "/ln/f/community"           `shouldBe` (Right $ OrganizationsForums "ln" (ShowS "community"))
       fromPathInfo "/ln/f/community/_new"      `shouldBe` (Right $ OrganizationsForumsBoards "ln" "community" New)
+      fromPathInfo "/ln/f/community/_edit/board_parent" `shouldBe` (Right $ OrganizationsForumsBoards "ln" "community" (EditS "board_parent"))
+      fromPathInfo "/ln/f/community/_delete/board_parent" `shouldBe` (Right $ OrganizationsForumsBoards "ln" "community" (DeleteS "board_parent"))
       fromPathInfo "/ln/f/community/board_parent" `shouldBe` (Right $ OrganizationsForumsBoards "ln" "community" (ShowS "board_parent"))
+      fromPathInfo "/ln/f/community/board_parent/_new" `shouldBe` (Right $ OrganizationsForumsBoardsThreads "ln" "community" "board_parent" New)
       fromPathInfo "/ln/f/community/board_parent/thread" `shouldBe` (Right $ OrganizationsForumsBoardsThreads "ln" "community" "board_parent" (ShowS "thread"))
+      fromPathInfo "/ln/f/community/board_parent/thread/_new" `shouldBe` (Right $ OrganizationsForumsBoardsThreadsPosts "ln" "community" "board_parent" "thread" New)
       fromPathInfo "/ln/f/community/board_parent/thread/1" `shouldBe` (Right $ OrganizationsForumsBoardsThreadsPosts "ln" "community" "board_parent" "thread" (ShowI 1))
 
 
