@@ -220,6 +220,10 @@ instance PathInfo Route where
 
     -- welcome to the inferno
     --
+    -- This is what you call, the definition of a massive hackjob.
+    --
+    -- It's nearly 7 AM and I still can't figure this out..
+    --
     <|> (do
            org_sid <- notCRUDstr1 -- Organizations
            (do
@@ -230,7 +234,7 @@ instance PathInfo Route where
                     board_sid <- notCRUDstr1 -- OrganizationsForumsBoards
                     (do
                        thread_sid <- notCRUDstr1 -- OrganizationsForumsBoardsThreads
-                       OrganizationsForumsBoardsThreadsPosts <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure thread_sid <*> fromPathSegments) <|> OrganizationsForumsBoardsThreads <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> fromPathSegments) <|> (fromPathSegments >>= \k -> if k == Index then (OrganizationsForums <$> pure org_sid <*> pure k) else OrganizationsForumsBoards <$> pure org_sid <*> pure forum_sid <*> pure k )) <|> OrganizationsForums <$> pure org_sid <*> fromPathSegments) <|> Organizations <$> (pure (ShowS org_sid)))
+                       fromPathSegments >>= \k -> if k == Index then (OrganizationsForumsBoardsThreads <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure (ShowS thread_sid)) else (OrganizationsForumsBoardsThreadsPosts <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure thread_sid <*> pure k)) <|> OrganizationsForumsBoardsThreads <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> fromPathSegments) <|> (fromPathSegments >>= \k -> if k == Index then (OrganizationsForums <$> pure org_sid <*> pure (ShowS forum_sid)) else OrganizationsForumsBoards <$> pure org_sid <*> pure forum_sid <*> pure k )) <|> OrganizationsForums <$> pure org_sid <*> fromPathSegments) <|> Organizations <$> (pure (ShowS org_sid)))
 
 --    <|> Organizations <$> (ShowS <$> str1)
     <|> pure Home)
