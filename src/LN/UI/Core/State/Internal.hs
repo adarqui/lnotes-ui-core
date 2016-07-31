@@ -50,6 +50,7 @@ data Store = Store {
       , _l_m_user                 :: !(Loader (Maybe UserPackResponse))
       , _l_m_forum                :: !(Loader (Maybe ForumPackResponse))
       , _m_forumRequest           :: !(Maybe ForumRequest)
+      , _m_forumRequestTag        :: !(Maybe Text)
       , _l_m_board                :: !(Loader (Maybe BoardPackResponse))
       , _m_boardRequest           :: !(Maybe BoardRequest)
       , _l_m_thread               :: !(Loader (Maybe ThreadPackResponse))
@@ -79,6 +80,7 @@ defaultStore = Store {
       , _l_m_user                 = Loaded Nothing
       , _l_m_forum                = Loaded Nothing
       , _m_forumRequest           = Nothing
+      , _m_forumRequestTag        = Nothing
       , _l_m_board                = Loaded Nothing
       , _m_boardRequest           = Nothing
       , _l_m_thread               = Loaded Nothing
