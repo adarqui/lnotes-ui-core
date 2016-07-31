@@ -211,11 +211,6 @@ instance PathInfo Route where
     <|> Errors        <$ segment "errors"
     <|> Portal        <$ segment "portal"
     <|> Users         <$ segment "users" <*> fromPathSegments
-    -- <|> try ((OrganizationsForums <$> str1 <*> (segment "f" *> (fromPathSegments :: URLParser CRUD))) <?> "OrganizationsForums failed")
-    -- <|> try ((OrganizationsForumsBoards <$> str1 <*> (segment "f" *> notCRUD) <*> (fromPathSegments :: URLParser CRUD)) <?> "OrganizationsForumsBoards failed")
---    <|> (try (OrganizationsForums <$> str1 <*> (segment "g" *> (fromPathSegments :: URLParser CRUD))) <?> "OrganizationsForums failed")
-    -- <|> (try (OrganizationsForums <$> str1 <*> (segment "f" *> (fromPathSegments :: URLParser CRUD))) <?> "OrganizationsForums failed")
-    -- <|> (try (OrganizationsForumsBoards <$> str1 <*> (segment "f" *> notCRUD) <*> (fromPathSegments :: URLParser CRUD)) <?> "OrganizationsForumsBoards failed")
     <|> Organizations <$ segment "organizations" <*> fromPathSegments
 
     -- welcome to the inferno
@@ -234,9 +229,8 @@ instance PathInfo Route where
                     board_sid <- notCRUDstr1 -- OrganizationsForumsBoards
                     (do
                        thread_sid <- notCRUDstr1 -- OrganizationsForumsBoardsThreads
-                       fromPathSegments >>= \k -> if k == Index then (OrganizationsForumsBoardsThreads <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure (ShowS thread_sid)) else (OrganizationsForumsBoardsThreadsPosts <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure thread_sid <*> pure k))     <|>     (fromPathSegments >>= \k -> if k == Index then (OrganizationsForumsBoards <$> pure org_sid <*> pure forum_sid <*> pure (ShowS board_sid)) else (OrganizationsForumsBoardsThreads <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure k))) <|> (fromPathSegments >>= \k -> if k == Index then (OrganizationsForums <$> pure org_sid <*> pure (ShowS forum_sid)) else OrganizationsForumsBoards <$> pure org_sid <*> pure forum_sid <*> pure k )) <|> OrganizationsForums <$> pure org_sid <*> fromPathSegments) <|> Organizations <$> (pure (ShowS org_sid)))
+                       fromPathSegments >>= \k -> if k == Index then (OrganizationsForumsBoardsThreads <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure (ShowS thread_sid)) else (OrganizationsForumsBoardsThreadsPosts <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure thread_sid <*> pure k))     <|>     (fromPathSegments >>= \k -> if k == Index then (OrganizationsForumsBoards <$> pure org_sid <*> pure forum_sid <*> pure (ShowS board_sid)) else (OrganizationsForumsBoardsThreads <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure k))) <|> (fromPathSegments >>= \k -> if k == Index then (OrganizationsForums <$> pure org_sid <*> pure (ShowS forum_sid)) else OrganizationsForumsBoards <$> pure org_sid <*> pure forum_sid <*> pure k)) <|> OrganizationsForums <$> pure org_sid <*> fromPathSegments) <|> Organizations <$> (pure (ShowS org_sid)))
 
---    <|> Organizations <$> (ShowS <$> str1)
     <|> pure Home)
     <?> "Route: fromPathSegments failed"
     -- TODO FIXME: Can't do Home <$ segment "" because it fails to pattern match. Though, pure Index works because it's terminal.

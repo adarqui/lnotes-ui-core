@@ -65,7 +65,7 @@ spec = do
       fromPathInfo "/ln/f/community/_new"      `shouldBe` (Right $ OrganizationsForumsBoards "ln" "community" New)
       fromPathInfo "/ln/f/community/board_parent" `shouldBe` (Right $ OrganizationsForumsBoards "ln" "community" (ShowS "board_parent"))
       fromPathInfo "/ln/f/community/board_parent/thread" `shouldBe` (Right $ OrganizationsForumsBoardsThreads "ln" "community" "board_parent" (ShowS "thread"))
-      fromPathInfo "/ln/f/community/board_parent/thread/1" `shouldBe` (Right $ OrganizationsForumsBoardsThreadsPosts "ln" "community" "board_parent" "threads" (ShowI 1))
+      fromPathInfo "/ln/f/community/board_parent/thread/1" `shouldBe` (Right $ OrganizationsForumsBoardsThreadsPosts "ln" "community" "board_parent" "thread" (ShowI 1))
 
 
   describe "route with tests" $ do
