@@ -19,6 +19,7 @@ import           LN.Api
 import qualified LN.Api.String as ApiS
 import           LN.Generate.Default
 import           LN.T
+import LN.T.Convert
 import           LN.UI.Core.Api
 import           LN.UI.Core.Control
 import           LN.UI.Core.Helpers.Map
@@ -162,9 +163,10 @@ runCore st core_result action         = runCoreM st $ do
 
     fetch_organization org_sid = do
       lr <- api $ ApiS.getOrganizationPack' org_sid
-      rehtie lr (const cantLoad_organization) $ \organization -> do
+      rehtie lr (const cantLoad_organization) $ \organization@OrganizationPackResponse{..} -> do
         modify (\st'->st'{
-          _l_m_organization = Loaded $ Just organization
+            _l_m_organization = Loaded $ Just organization
+          , _m_organizationRequest = Just $ organizationResponseToOrganizationRequest organizationPackResponseOrganization
         })
         done
 
