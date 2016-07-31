@@ -44,7 +44,7 @@ instance PathInfo CRUD where
   toPathSegments crud =
     case crud of
       Index     -> [""]
-      New       -> ["new"]
+      New       -> ["_new"]
       ShowS s   -> [s]
       ShowI i   -> [Text.pack $ show i]
       ShowB b   -> [bool2Text b]
@@ -54,7 +54,7 @@ instance PathInfo CRUD where
       DeleteI i -> ["_delete", Text.pack $ show i]
       DeleteZ   -> ["_delete"]
   fromPathSegments =
-        New     <$  segment "new"
+        New     <$  segment "_new"
 
     -- TODO FIXME: This is hideous.
     <|>      (try (EditI <$  segment "_edit"   <*> fromPathSegments)

@@ -209,8 +209,8 @@ instance PathInfo Route where
     <|> Errors        <$ segment "errors"
     <|> Portal        <$ segment "portal"
     <|> Users         <$ segment "users" <*> fromPathSegments
-    <|> try (OrganizationsForumsBoardsThreadsPosts <$> anySegment <*> (segment "f" *> fromPathSegments)) <*> fromPathSegments <*> fromPathSegments <*> fromPathSegments
-    <|> try (OrganizationsForumsBoardsThreads <$> anySegment <*> (segment "f" *> fromPathSegments)) <*> fromPathSegments <*> fromPathSegments
+--    <|> try (OrganizationsForumsBoardsThreadsPosts <$> anySegment <*> (segment "f" *> fromPathSegments)) <*> fromPathSegments <*> fromPathSegments <*> fromPathSegments
+--    <|> try (OrganizationsForumsBoardsThreads <$> anySegment <*> (segment "f" *> fromPathSegments)) <*> fromPathSegments <*> fromPathSegments
     <|> try (OrganizationsForumsBoards <$> anySegment <*> (segment "f" *> fromPathSegments)) <*> fromPathSegments
     <|> try (OrganizationsForums <$> anySegment <*> (segment "f" *> fromPathSegments))
     <|> Organizations <$ segment "organizations" <*> fromPathSegments

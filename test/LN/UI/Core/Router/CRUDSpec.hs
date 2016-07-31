@@ -28,7 +28,7 @@ spec = do
       toPathInfo (ShowI 9)      `shouldBe` "/9"
       toPathInfo (ShowB True)   `shouldBe` "/true"
       toPathInfo (ShowB False)  `shouldBe` "/false"
-      toPathInfo New            `shouldBe` "/new"
+      toPathInfo New            `shouldBe` "/_new"
       toPathInfo (EditS "ln")   `shouldBe` "/_edit/ln"
       toPathInfo (EditI 9)      `shouldBe` "/_edit/9"
       toPathInfo (DeleteS "ln") `shouldBe` "/_delete/ln"
@@ -41,7 +41,7 @@ spec = do
       fromPathInfo "/9"          `shouldBe` (Right $ ShowI 9)
       fromPathInfo "/true"       `shouldBe` (Right $ ShowB True)
       fromPathInfo "/false"      `shouldBe` (Right $ ShowB False)
-      fromPathInfo "/new"        `shouldBe` (Right New)
+      fromPathInfo "/_new"        `shouldBe` (Right New)
       fromPathInfo "/_edit/ln"   `shouldBe` (Right $ EditS "ln")
       fromPathInfo "/_edit/9"    `shouldBe` (Right $ EditI 9)
       fromPathInfo "/_delete/ln" `shouldBe` (Right $ DeleteS "ln")
