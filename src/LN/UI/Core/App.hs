@@ -27,6 +27,7 @@ import           LN.UI.Core.Loader
 import           LN.UI.Core.PageInfo
 import           LN.UI.Core.Router
 import           LN.UI.Core.State
+import LN.UI.Core.Types
 
 
 
@@ -89,7 +90,9 @@ runCore st core_result action         = runCoreM st $ do
     RouteWith (Organizations (EditS org_sid)) _   -> basedOn load_organization (fetch_organization org_sid)
     RouteWith (Organizations (DeleteS org_sid)) _ -> basedOn load_organization (fetch_organization org_sid)
 
-    RouteWith (OrganizationsForums org_sid Index) _  -> basedOn (load_organizations_forums_index org_sid) (fetch_organizations_forums_index org_sid)
+--    RouteWith (OrganizationsForums org_sid New) _                -> basedOn load_organizations_forums_new (fetch_organizations_forums_new org_sid)
+--    RouteWith (OrganizationsForums org_sid Index) _              -> basedOn (load_organizations_forums_index org_sid) (fetch_organizations_forums_index org_sid)
+--    RouteWith (OrganizationsForums org_sid (ShowS forum_sid)) _  -> basedOn load_organizations_forums_boards_index (fetch_organizations_forums_boards_index org_sid forum_sid)
 
     RouteWith (Users Index) _              -> basedOn load_users_index fetch_users_index
     -- RouteWith (Users (ShowS user_sid)) _   -> start
@@ -107,32 +110,13 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
-    load_organizations_new = modify (\st'->st'{_m_organizationRequest = Just defaultOrganizationRequest}) *> next
-
-
-
-    load_organizations_index = modify (\st'->st'{_l_organizations = Loading}) *> next
-
-    cantLoad_organizations_index = modify (\st'->st'{_l_organizations = CantLoad}) *> done
-
-    fetch_organizations_index = do
-      lr <- runEitherT $ do
-        count         <- mustPassT $ api $ getOrganizationsCount'
-        organizations <- mustPassT $ api $ getOrganizationPacks params_list
-        pure (count, organizations)
-      rehtie lr (const $ cantLoad_organizations_index) $ \(count, organization_packs) -> do
-        modify (\st'->st'{
-            _l_organizations = Loaded $ idmapFrom organizationPackResponseOrganizationId (organizationPackResponses organization_packs)
-          , _pageInfo = new_page_info count
-          })
-        done
-
-
-
+    load_users_index :: MonadIO m => CoreM m CoreResult
     load_users_index = modify (\st'->st'{_l_users = Loading}) *> next
 
+    cantLoad_users_index :: MonadIO m => CoreM m CoreResult
     cantLoad_users_index = modify (\st'->st'{_l_users = CantLoad}) *> done
 
+    fetch_users_index :: MonadIO m => CoreM m CoreResult
     fetch_users_index = do
       lr <- runEitherT $ do
         count <- mustPassT $ api $ getUsersCount'
@@ -147,20 +131,14 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
-    load_organization_show = do
-      void load_organization
-      void load_forums_index
-      next
 
-    fetch_organization_show org_sid = do
-      fetch_organizations_forums_index org_sid
-
-
-
+    load_organization :: MonadIO m => CoreM m CoreResult
     load_organization = modify (\st'->st'{_l_m_organization = Loading}) *> next
 
+    cantLoad_organization :: MonadIO m => CoreM m CoreResult
     cantLoad_organization = modify (\st'->st'{_l_m_organization = CantLoad}) *> done
 
+    fetch_organization :: MonadIO m => OrganizationName -> CoreM m CoreResult
     fetch_organization org_sid = do
       lr <- api $ ApiS.getOrganizationPack' org_sid
       rehtie lr (const cantLoad_organization) $ \organization@OrganizationPackResponse{..} -> do
@@ -172,11 +150,22 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
+    load_forums_new :: MonadIO m => CoreM m CoreResult
+    load_forums_new = modify (\st'->st'{_m_forumRequest = Just defaultForumRequest}) *> next
+
+    cantLoad_forums_new :: MonadIO m => CoreM m CoreResult
+    cantLoad_forums_new = modify (\st'->st'{_m_forumRequest = Nothing}) *> done
+
+
+
+    load_forums_index :: MonadIO m => CoreM m CoreResult
     load_forums_index = modify (\st'->st'{_l_forums = Loading}) *> next
 
+    cantLoad_forums_index :: MonadIO m => CoreM m CoreResult
     cantLoad_forums_index = modify (\st'->st'{_l_forums = CantLoad}) *> done
 
-    fetch_forums_index org_sid = do
+    fetch_forums_index :: MonadIO m => CoreM m CoreResult
+    fetch_forums_index = do
       Store{..} <- get
       case _l_m_organization of
         Loaded (Just organization@OrganizationPackResponse{..}) -> do
@@ -190,23 +179,151 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
-    load_organizations_forums_index org_sid = do
+
+    load_boards_new :: MonadIO m => CoreM m CoreResult
+    load_boards_new = modify (\st'->st'{_m_boardRequest = Just defaultBoardRequest}) *> next
+
+    cantLoad_boards_new :: MonadIO m => CoreM m CoreResult
+    cantLoad_boards_new = modify (\st'->st'{_m_boardRequest = Nothing}) *> done
+
+
+
+
+    load_boards_index :: MonadIO m => CoreM m CoreResult
+    load_boards_index = modify (\st'->st'{_l_boards = Loading}) *> next
+
+    cantLoad_boards_index :: MonadIO m => CoreM m CoreResult
+    cantLoad_boards_index = modify (\st'->st'{_l_boards = CantLoad}) *> done
+
+    fetch_boards_index :: MonadIO m => CoreM m CoreResult
+    fetch_boards_index = do
+      Store{..} <- get
+      case _l_m_forum of
+        Loaded (Just forum@ForumPackResponse{..}) -> do
+          lr <- api $ getBoardPacks_ByForumId' forumPackResponseForumId
+          rehtie lr (const cantLoad_boards_index) $ \BoardPackResponses{..} -> do
+            modify (\st'->st'{
+              _l_boards = Loaded $ idmapFrom boardPackResponseBoardId boardPackResponses
+            })
+            done
+        _ -> cantLoad_boards_index
+
+
+
+
+    load_organizations_new :: MonadIO m => CoreM m CoreResult
+    load_organizations_new = modify (\st'->st'{_m_organizationRequest = Just defaultOrganizationRequest}) *> next
+
+
+
+    load_organizations_index :: MonadIO m => CoreM m CoreResult
+    load_organizations_index = modify (\st'->st'{_l_organizations = Loading}) *> next
+
+    cantLoad_organizations_index :: MonadIO m => CoreM m CoreResult
+    cantLoad_organizations_index = modify (\st'->st'{_l_organizations = CantLoad}) *> done
+
+    fetch_organizations_index :: MonadIO m => CoreM m CoreResult
+    fetch_organizations_index = do
+      lr <- runEitherT $ do
+        count         <- mustPassT $ api $ getOrganizationsCount'
+        organizations <- mustPassT $ api $ getOrganizationPacks params_list
+        pure (count, organizations)
+      rehtie lr (const $ cantLoad_organizations_index) $ \(count, organization_packs) -> do
+        modify (\st'->st'{
+            _l_organizations = Loaded $ idmapFrom organizationPackResponseOrganizationId (organizationPackResponses organization_packs)
+          , _pageInfo = new_page_info count
+          })
+        done
+
+
+
+
+
+    load_organization_show :: MonadIO m => CoreM m CoreResult
+    load_organization_show = do
       void load_organization
       void load_forums_index
       next
 
+    fetch_organization_show :: MonadIO m => OrganizationName -> CoreM m CoreResult
+    fetch_organization_show org_sid = do
+      fetch_organizations_forums_index org_sid
+
+
+
+
+
+    load_organizations_forums_index :: MonadIO m => CoreM m CoreResult
+    load_organizations_forums_index = do
+      void load_organization
+      void load_forums_index
+      next
+
+    cantLoad_organizations_forums_index :: MonadIO m => CoreM m CoreResult
     cantLoad_organizations_forums_index = do
       void cantLoad_organization
       void cantLoad_forums_index
       done
 
+    fetch_organizations_forums_index :: MonadIO m => OrganizationName -> CoreM m CoreResult
     fetch_organizations_forums_index org_sid = do
       Store{..} <- get
       case (_l_m_organization, _l_forums) of
         (Loading, _)         -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next next
-        (Loaded _, Loading)  -> fetch_forums_index org_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded _, Loading)  -> fetch_forums_index         >>= \core_result_ -> basedOn_ core_result_ start next next
         (Loaded _, Loaded _) -> done
         _                    -> cantLoad_organizations_forums_index
+
+
+
+
+
+    load_organizations_forums_new :: MonadIO m => CoreM m CoreResult
+    load_organizations_forums_new = do
+      void load_organization
+      void load_forums_new
+      next
+
+    cantLoad_organizations_forums_new :: MonadIO m => CoreM m CoreResult
+    cantLoad_organizations_forums_new = do
+      void cantLoad_organization
+      void cantLoad_forums_new
+      done
+
+    fetch_organizations_forums_new :: MonadIO m => OrganizationName -> CoreM m CoreResult
+    fetch_organizations_forums_new org_sid = do
+      Store{..} <- get
+      case _l_m_organization of
+        Loading   -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        Loaded _  -> done
+        _         -> cantLoad_organizations_forums_new
+
+
+
+
+
+    -- load_organizations_forums_boards_index org_sid forum_sid = do
+    --   void load_organization
+    --   void load_forums_index
+    --   void load_boards_index
+    --   next
+
+    -- cantLoad_organizations_forums_boards_index = do
+    --   void cantLoad_organization
+    --   void cantLoad_forums_index
+    --   void cantLoad_boards_index
+    --   done
+
+    -- fetch_organizations_forums_boards_index org_sid forum_sid = do
+    --   done
+    --   Store{..} <- get
+    --   case (_l_m_organization, _l_forums, _l_boards) of
+    --     (Loading, _, _)                -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+    --     (Loaded _, Loading, _)         -> fetch_forums_index         >>= \core_result_ -> basedOn_ core_result_ start next next
+    --     (Loaded _, Loaded _, Loading)  -> fetch_boards_index         >>= \core_result_ -> basedOn_ core_result_ start next next
+    --     (Loaded _, Loaded _, Loaded _) -> done
+    --     _                              -> cantLoad_organizations_forums_boards_index
+
 
 
 
