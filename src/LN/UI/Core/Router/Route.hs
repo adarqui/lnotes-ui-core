@@ -224,11 +224,11 @@ instance PathInfo Route where
            (do
               segment "f"
               (do
-                 forum_sid <- str1
+                 forum_sid <- notCRUD
                  (do
-                    board_sid <- str1
+                    board_sid <- notCRUD
                     (do
-                       thread_sid <- str1
+                       thread_sid <- notCRUD
                        OrganizationsForumsBoardsThreadsPosts <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure thread_sid <*> fromPathSegments) <|> OrganizationsForumsBoardsThreads <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> fromPathSegments) <|> OrganizationsForumsBoards <$> pure org_sid <*> pure forum_sid <*> fromPathSegments) <|> OrganizationsForums <$> pure org_sid <*> fromPathSegments) <|> Organizations <$> fromPathSegments)
 
     <|> Organizations <$> (ShowS <$> str1)
