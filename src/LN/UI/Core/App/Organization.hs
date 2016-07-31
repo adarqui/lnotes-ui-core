@@ -19,11 +19,10 @@ module LN.UI.Core.App.Organization (
 
 
 
-import           Control.Monad.RWS.Strict
 import           Data.Text                   (Text)
 
 import           LN.T
-import           LN.UI.Core.Helpers.DataList (deleteNth)
+import qualified LN.UI.Core.App.Tag          as Tag
 import           LN.UI.Core.State
 
 
@@ -83,19 +82,22 @@ addTag :: OrganizationRequest -> Maybe Text -> Action
 addTag request@OrganizationRequest{..} m_tag =
   ApplyState (\st->
     st{
-      _m_organizationRequest = Just $!
-        request{organizationRequestTags = maybe organizationRequestTags (\tag -> organizationRequestTags <> [tag]) m_tag}
+      _m_organizationRequest = Just $! request{organizationRequestTags = tags}
     , _m_organizationRequestTag = Nothing
     })
+  where
+  (tags, _) = Tag.addTag organizationRequestTags m_tag
 
 
 
 deleteTag :: OrganizationRequest -> Int -> Action
 deleteTag request@OrganizationRequest{..} idx =
-   ApplyState (\st->
-     st{
-       _m_organizationRequest = Just $! request{organizationRequestTags = deleteNth idx organizationRequestTags}
-     })
+  ApplyState (\st->
+    st{
+      _m_organizationRequest = Just $! request{organizationRequestTags = tags}
+    })
+  where
+  tags = Tag.deleteTag organizationRequestTags idx
 
 
 
