@@ -19,6 +19,7 @@ library
                        LN.UI.Core.Access
                        LN.UI.Core.Api
                        LN.UI.Core.App
+                       LN.UI.Core.App.Organization
                        LN.UI.Core.Control
                        LN.UI.Core.Loader
                        LN.UI.Core.PageInfo
