@@ -20,28 +20,29 @@ module LN.UI.Core.Router.Route (
 
 
 
-import           Control.Applicative        ((*>), (<$), (<$>), (<*>), (<|>))
-import           Control.DeepSeq            (NFData)
-import           Data.ByteString.Char8      (ByteString)
-import qualified Data.ByteString.Char8      as BSC
-import           Data.Either                (Either (..))
-import qualified Data.Map                   as Map
-import           Data.Maybe                 (Maybe (Just))
-import           Data.Monoid                (mempty, (<>))
-import           Data.Text                  (Text)
-import           Prelude                    (Eq, Int, Show, fmap, map, pure,
-                                             ($), (.))
-import           Text.Parsec.Prim           (try)
+import           Control.Applicative          ((*>), (<$), (<$>), (<*>), (<|>))
+import           Control.DeepSeq              (NFData)
+import           Data.ByteString.Char8        (ByteString)
+import qualified Data.ByteString.Char8        as BSC
+import           Data.Either                  (Either (..))
+import qualified Data.Map                     as Map
+import           Data.Maybe                   (Maybe (Just))
+import           Data.Monoid                  (mempty, (<>))
+import           Data.Text                    (Text)
+import           Prelude                      (Eq, Int, Show, fmap, map, pure,
+                                               ($), (.))
+import           Text.Parsec.Prim             (try, (<?>))
 import           Web.Routes
 
-import           Haskell.Api.Helpers.Shared (qp)
+import           Haskell.Api.Helpers.Shared   (qp)
 import           LN.T
-import           LN.UI.Core.Helpers.GHCJS   (JSString, textToJSString')
-import           LN.UI.Core.Router.CRUD     (CRUD (..))
-import           LN.UI.Core.Router.Crumb    (HasCrumb, crumb)
-import           LN.UI.Core.Router.LinkName (HasLinkName, linkName)
-import           LN.UI.Core.Router.Param    (Params, buildParams,
-                                             fromWebRoutesParams)
+import           LN.UI.Core.Helpers.GHCJS     (JSString, textToJSString')
+import           LN.UI.Core.Helpers.WebRoutes (str1, notCRUD)
+import           LN.UI.Core.Router.CRUD       (CRUD (..))
+import           LN.UI.Core.Router.Crumb      (HasCrumb, crumb)
+import           LN.UI.Core.Router.LinkName   (HasLinkName, linkName)
+import           LN.UI.Core.Router.Param      (Params, buildParams,
+                                               fromWebRoutesParams)
 
 
 
@@ -77,7 +78,7 @@ fromRouteWithHash = textToJSString' . ("#" <>) <$> fromRouteWith
 toRouteWith :: ByteString -> RouteWith
 toRouteWith url =
   case (fromPathInfoParams url) of
-    Left _              -> routeWith' NotFound
+    Left _               -> routeWith' NotFound
     Right (url_, params) -> routeWith url_ $ fromWebRoutesParams params
 
 
@@ -204,16 +205,27 @@ instance PathInfo Route where
     _                        -> pure ""
 
   fromPathSegments =
-        About         <$ segment "about"
+        (About         <$ segment "about"
     <|> Me            <$ segment "me"
     <|> Errors        <$ segment "errors"
     <|> Portal        <$ segment "portal"
     <|> Users         <$ segment "users" <*> fromPathSegments
---    <|> try (OrganizationsForumsBoardsThreadsPosts <$> anySegment <*> (segment "f" *> fromPathSegments)) <*> fromPathSegments <*> fromPathSegments <*> fromPathSegments
---    <|> try (OrganizationsForumsBoardsThreads <$> anySegment <*> (segment "f" *> fromPathSegments)) <*> fromPathSegments <*> fromPathSegments
-    <|> try (OrganizationsForumsBoards <$> anySegment <*> (segment "f" *> fromPathSegments)) <*> fromPathSegments
-    <|> try (OrganizationsForums <$> anySegment <*> (segment "f" *> fromPathSegments))
+    -- <|> try ((OrganizationsForums <$> str1 <*> (segment "f" *> (fromPathSegments :: URLParser CRUD))) <?> "OrganizationsForums failed")
+    -- <|> try ((OrganizationsForumsBoards <$> str1 <*> (segment "f" *> notCRUD) <*> (fromPathSegments :: URLParser CRUD)) <?> "OrganizationsForumsBoards failed")
+--    <|> (try (OrganizationsForums <$> str1 <*> (segment "g" *> (fromPathSegments :: URLParser CRUD))) <?> "OrganizationsForums failed")
+    -- <|> (try (OrganizationsForums <$> str1 <*> (segment "f" *> (fromPathSegments :: URLParser CRUD))) <?> "OrganizationsForums failed")
+    -- <|> (try (OrganizationsForumsBoards <$> str1 <*> (segment "f" *> notCRUD) <*> (fromPathSegments :: URLParser CRUD)) <?> "OrganizationsForumsBoards failed")
     <|> Organizations <$ segment "organizations" <*> fromPathSegments
-    <|> Organizations <$> (ShowS <$> anySegment)
-    <|> pure Home
+    <|> (do
+            org_sid <- str1
+            (do
+                segment "f"
+                (do
+                  forum_sid <- str1
+                  (OrganizationsForumsBoards <$> pure org_sid <*> pure forum_sid <*> fromPathSegments)) <|> ((OrganizationsForums <$> pure org_sid <*> fromPathSegments))) <|> (Organizations <$> fromPathSegments))
+                -- board <- fromPathSegments
+                -- thread <- fromPathSegments)
+    <|> Organizations <$> (ShowS <$> str1)
+    <|> pure Home)
+    <?> "Route: fromPathSegments failed"
     -- TODO FIXME: Can't do Home <$ segment "" because it fails to pattern match. Though, pure Index works because it's terminal.

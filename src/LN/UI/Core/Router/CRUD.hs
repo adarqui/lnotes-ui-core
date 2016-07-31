@@ -17,9 +17,10 @@ import           Data.Text                          (Text)
 import qualified Data.Text                          as Text
 import           Prelude                            (Bool (..), Eq, Show, show,
                                                      ($))
-import           Text.ParserCombinators.Parsec.Prim (try)
+import           Text.ParserCombinators.Parsec.Prim (try, (<?>))
 import           Web.Routes
 
+import           LN.UI.Core.Helpers.WebRoutes       (str1, nostr)
 import           LN.UI.Core.Router.Link             ()
 import           LN.UI.Core.Router.LinkName         (HasLinkName, linkName)
 
@@ -54,21 +55,39 @@ instance PathInfo CRUD where
       DeleteI i -> ["_delete", Text.pack $ show i]
       DeleteZ   -> ["_delete"]
   fromPathSegments =
-        New     <$  segment "_new"
+        (New     <$  segment "_new"
 
     -- TODO FIXME: This is hideous.
-    <|>      (try (EditI <$  segment "_edit"   <*> fromPathSegments)
-         <|> EditS <$  segment "_edit"   <*> fromPathSegments)
-
+--    <|> try (ShowS <$> (anySegment *> anySegment *> anySegment))
+    -- <|> (try
+    --     (EditI <$ segment "_edit" <*> fromPathSegments)
+    --     <|>
+    --     (EditS <$ segment "_edit" <*> str1))
+    -- <|> EditI <$ segment "_edit" <*> fromPathSegments
+    -- <|> EditS <$ segment "_edit" <*> str1
+    <|> (do
+            segment "_edit"
+            (EditI <$> fromPathSegments) <|> (EditS <$> str1))
+--            pure $ (EditI <*> fromPathSegments) <|> (EditS <$> str1))
     -- TODO FIXME: This is hideous.
-    <|>      (try (DeleteI <$  segment "_delete" <*> fromPathSegments)
-         <|> (try (DeleteS <$  segment "_delete" <*> fromPathSegments)
-         <|> DeleteZ <$  segment "_delete"))
+    -- <|> (try
+    --      (DeleteI <$ segment "_delete" <*> fromPathSegments)
+    --      <|>
+    --      (try
+    --       (DeleteS <$ segment "_delete" <*> str1)
+    --       <|>
+    --       DeleteZ <$ segment "_delete"))
+    <|> (do
+            segment "_delete"
+            (DeleteI <$> fromPathSegments) <|> (DeleteS <$> str1) <|> (pure DeleteZ))
 
-    <|> ShowI   <$> fromPathSegments
-    <|> ShowB   <$> fromPathSegments
-    <|> ShowS   <$> fromPathSegments
-    <|> pure Index
+    <|> ShowI <$> fromPathSegments
+    <|> ShowB <$> fromPathSegments
+    <|> ShowS <$> str1
+--    <|> Index <$ segment ""
+--    <|> Index <$ nostr
+    <|> pure Index)
+    <?> "CRUD: fromPathSegments failed"
     -- TODO FIXME: Can't do Index <$ segment "" because it fails to pattern match. Though, pure Index works because it's terminal.
 
 
@@ -91,8 +110,9 @@ instance PathInfo Bool where
       True  -> ["true"]
       False -> ["false"]
   fromPathSegments =
-        True <$ segment "true"
-    <|> False <$ segment "false"
+        (True <$ segment "true"
+    <|> False <$ segment "false")
+    <?> "Boo: fromPathSegments failed"
 
 
 
