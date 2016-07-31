@@ -216,15 +216,21 @@ instance PathInfo Route where
     -- <|> (try (OrganizationsForums <$> str1 <*> (segment "f" *> (fromPathSegments :: URLParser CRUD))) <?> "OrganizationsForums failed")
     -- <|> (try (OrganizationsForumsBoards <$> str1 <*> (segment "f" *> notCRUD) <*> (fromPathSegments :: URLParser CRUD)) <?> "OrganizationsForumsBoards failed")
     <|> Organizations <$ segment "organizations" <*> fromPathSegments
+
+    -- welcome to the inferno
+    --
     <|> (do
-            org_sid <- str1
-            (do
-                segment "f"
-                (do
-                  forum_sid <- str1
-                  (OrganizationsForumsBoards <$> pure org_sid <*> pure forum_sid <*> fromPathSegments)) <|> ((OrganizationsForums <$> pure org_sid <*> fromPathSegments))) <|> (Organizations <$> fromPathSegments))
-                -- board <- fromPathSegments
-                -- thread <- fromPathSegments)
+           org_sid <- str1
+           (do
+              segment "f"
+              (do
+                 forum_sid <- str1
+                 (do
+                    board_sid <- str1
+                    (do
+                       thread_sid <- str1
+                       OrganizationsForumsBoardsThreadsPosts <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure thread_sid <*> fromPathSegments) <|> OrganizationsForumsBoardsThreads <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> fromPathSegments) <|> OrganizationsForumsBoards <$> pure org_sid <*> pure forum_sid <*> fromPathSegments) <|> OrganizationsForums <$> pure org_sid <*> fromPathSegments) <|> Organizations <$> fromPathSegments)
+
     <|> Organizations <$> (ShowS <$> str1)
     <|> pure Home)
     <?> "Route: fromPathSegments failed"
