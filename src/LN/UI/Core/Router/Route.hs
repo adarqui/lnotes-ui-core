@@ -29,9 +29,8 @@ import qualified Data.Map                     as Map
 import           Data.Maybe                   (Maybe (Just))
 import           Data.Monoid                  (mempty, (<>))
 import           Data.Text                    (Text)
-import           Prelude                      (Eq, Int, Show, fmap, map, pure,
-
-                                               ($), (.))
+import           Prelude                      (Eq, Int, Show, fmap, map, pure, (>>=),
+                                               ($), (.), (==))
 import           Text.Parsec.Prim             (try, (<?>))
 import           Web.Routes
 import Text.ParserCombinators.Parsec.Combinator
@@ -227,12 +226,11 @@ instance PathInfo Route where
               segment "f"
               (do
                  forum_sid <- notCRUDstr1 -- OrganizationsForums
-                 lookAhead eof
                  (do
                     board_sid <- notCRUDstr1 -- OrganizationsForumsBoards
                     (do
                        thread_sid <- notCRUDstr1 -- OrganizationsForumsBoardsThreads
-                       OrganizationsForumsBoardsThreadsPosts <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure thread_sid <*> fromPathSegments) <|> OrganizationsForumsBoardsThreads <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> fromPathSegments) <|> OrganizationsForumsBoards <$> pure org_sid <*> pure forum_sid <*> fromPathSegments) <|> OrganizationsForums <$> pure org_sid <*> fromPathSegments) <|> Organizations <$> (pure (ShowS org_sid)))
+                       OrganizationsForumsBoardsThreadsPosts <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure thread_sid <*> fromPathSegments) <|> OrganizationsForumsBoardsThreads <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> fromPathSegments) <|> (fromPathSegments >>= \k -> if k == Index then (OrganizationsForums <$> pure org_sid <*> pure k) else OrganizationsForumsBoards <$> pure org_sid <*> pure forum_sid <*> pure k )) <|> OrganizationsForums <$> pure org_sid <*> fromPathSegments) <|> Organizations <$> (pure (ShowS org_sid)))
 
 --    <|> Organizations <$> (ShowS <$> str1)
     <|> pure Home)
