@@ -11,19 +11,20 @@ module LN.UI.Core.Router.CRUD (
 
 
 import           Control.Applicative
-import           Control.DeepSeq                    (NFData)
-import           Data.Int                           (Int64)
-import           Data.Text                          (Text)
-import qualified Data.Text                          as Text
-import           Prelude                            (Bool (..), Eq, Show, show,
-                                                     ($))
-import           Text.ParserCombinators.Parsec.Prim (try, (<?>))
-import Text.ParserCombinators.Parsec.Combinator (eof)
+import           Control.DeepSeq                          (NFData)
+import           Data.Int                                 (Int64)
+import           Data.Text                                (Text)
+import qualified Data.Text                                as Text
+import           Prelude                                  (Bool (..), Eq, Show,
+                                                           show, ($))
+import           Text.ParserCombinators.Parsec.Combinator (eof)
+import           Text.ParserCombinators.Parsec.Prim       (try, (<?>))
 import           Web.Routes
 
-import           LN.UI.Core.Helpers.WebRoutes       (str1, nostr)
-import           LN.UI.Core.Router.Link             ()
-import           LN.UI.Core.Router.LinkName         (HasLinkName, linkName)
+import           LN.UI.Core.Helpers.WebRoutes             (nostr, str1)
+import           LN.UI.Core.Router.Link                   ()
+import           LN.UI.Core.Router.LinkName               (HasLinkName,
+                                                           linkName)
 
 
 
@@ -59,25 +60,10 @@ instance PathInfo CRUD where
         (New     <$  segment "_new"
 
     -- TODO FIXME: This is hideous.
---    <|> try (ShowS <$> (anySegment *> anySegment *> anySegment))
-    -- <|> (try
-    --     (EditI <$ segment "_edit" <*> fromPathSegments)
-    --     <|>
-    --     (EditS <$ segment "_edit" <*> str1))
-    -- <|> EditI <$ segment "_edit" <*> fromPathSegments
-    -- <|> EditS <$ segment "_edit" <*> str1
     <|> (do
             segment "_edit"
             (EditI <$> fromPathSegments) <|> (EditS <$> str1))
---            pure $ (EditI <*> fromPathSegments) <|> (EditS <$> str1))
     -- TODO FIXME: This is hideous.
-    -- <|> (try
-    --      (DeleteI <$ segment "_delete" <*> fromPathSegments)
-    --      <|>
-    --      (try
-    --       (DeleteS <$ segment "_delete" <*> str1)
-    --       <|>
-    --       DeleteZ <$ segment "_delete"))
     <|> (do
             segment "_delete"
             (DeleteI <$> fromPathSegments) <|> (DeleteS <$> str1) <|> (pure DeleteZ))
@@ -85,9 +71,6 @@ instance PathInfo CRUD where
     <|> ShowI <$> fromPathSegments
     <|> ShowB <$> fromPathSegments
     <|> ShowS <$> str1
---    <|> Index <$ segment ""
---    <|> Index <$ nostr)
---    <|> Index <$ eof)
     <|> pure Index)
     <?> "CRUD: fromPathSegments failed"
     -- TODO FIXME: Can't do Index <$ segment "" because it fails to pattern match. Though, pure Index works because it's terminal.
