@@ -30,14 +30,16 @@ import           Data.Maybe                   (Maybe (Just))
 import           Data.Monoid                  (mempty, (<>))
 import           Data.Text                    (Text)
 import           Prelude                      (Eq, Int, Show, fmap, map, pure,
+
                                                ($), (.))
 import           Text.Parsec.Prim             (try, (<?>))
 import           Web.Routes
+import Text.ParserCombinators.Parsec.Combinator
 
 import           Haskell.Api.Helpers.Shared   (qp)
 import           LN.T
 import           LN.UI.Core.Helpers.GHCJS     (JSString, textToJSString')
-import           LN.UI.Core.Helpers.WebRoutes (str1, notCRUD)
+import           LN.UI.Core.Helpers.WebRoutes (str1, notCRUD, notCRUDstr1)
 import           LN.UI.Core.Router.CRUD       (CRUD (..))
 import           LN.UI.Core.Router.Crumb      (HasCrumb, crumb)
 import           LN.UI.Core.Router.LinkName   (HasLinkName, linkName)
@@ -220,18 +222,19 @@ instance PathInfo Route where
     -- welcome to the inferno
     --
     <|> (do
-           org_sid <- str1
+           org_sid <- notCRUDstr1 -- Organizations
            (do
               segment "f"
               (do
-                 forum_sid <- notCRUD
+                 forum_sid <- notCRUDstr1 -- OrganizationsForums
+                 lookAhead eof
                  (do
-                    board_sid <- notCRUD
+                    board_sid <- notCRUDstr1 -- OrganizationsForumsBoards
                     (do
-                       thread_sid <- notCRUD
-                       OrganizationsForumsBoardsThreadsPosts <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure thread_sid <*> fromPathSegments) <|> OrganizationsForumsBoardsThreads <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> fromPathSegments) <|> OrganizationsForumsBoards <$> pure org_sid <*> pure forum_sid <*> fromPathSegments) <|> OrganizationsForums <$> pure org_sid <*> fromPathSegments) <|> Organizations <$> fromPathSegments)
+                       thread_sid <- notCRUDstr1 -- OrganizationsForumsBoardsThreads
+                       OrganizationsForumsBoardsThreadsPosts <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> pure thread_sid <*> fromPathSegments) <|> OrganizationsForumsBoardsThreads <$> pure org_sid <*> pure forum_sid <*> pure board_sid <*> fromPathSegments) <|> OrganizationsForumsBoards <$> pure org_sid <*> pure forum_sid <*> fromPathSegments) <|> OrganizationsForums <$> pure org_sid <*> fromPathSegments) <|> Organizations <$> (pure (ShowS org_sid)))
 
-    <|> Organizations <$> (ShowS <$> str1)
+--    <|> Organizations <$> (ShowS <$> str1)
     <|> pure Home)
     <?> "Route: fromPathSegments failed"
     -- TODO FIXME: Can't do Home <$ segment "" because it fails to pattern match. Though, pure Index works because it's terminal.

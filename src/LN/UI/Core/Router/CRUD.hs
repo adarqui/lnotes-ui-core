@@ -18,6 +18,7 @@ import qualified Data.Text                          as Text
 import           Prelude                            (Bool (..), Eq, Show, show,
                                                      ($))
 import           Text.ParserCombinators.Parsec.Prim (try, (<?>))
+import Text.ParserCombinators.Parsec.Combinator (eof)
 import           Web.Routes
 
 import           LN.UI.Core.Helpers.WebRoutes       (str1, nostr)
@@ -85,7 +86,8 @@ instance PathInfo CRUD where
     <|> ShowB <$> fromPathSegments
     <|> ShowS <$> str1
 --    <|> Index <$ segment ""
---    <|> Index <$ nostr
+--    <|> Index <$ nostr)
+--    <|> Index <$ eof)
     <|> pure Index)
     <?> "CRUD: fromPathSegments failed"
     -- TODO FIXME: Can't do Index <$ segment "" because it fails to pattern match. Though, pure Index works because it's terminal.

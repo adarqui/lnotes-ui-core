@@ -5,6 +5,7 @@ module LN.UI.Core.Helpers.WebRoutes (
     str1
   , nostr
   , notCRUD
+  , notCRUDstr1
 ) where
 
 
@@ -28,3 +29,8 @@ nostr = (pToken (const ()) (\y -> if (Text.null y) then Just y else Nothing)) <?
 
 notCRUD :: URLParser Text
 notCRUD = (pToken (const ()) (\y -> if (not $ any (==y) ["_new","_edit","_delete"]) then Just y else Nothing)) <?> "String contains CRUD"
+
+
+
+notCRUDstr1 :: URLParser Text
+notCRUDstr1 = (pToken (const ()) (\y -> if (not $ any (==y) ["_new","_edit","_delete"] && (not $ Text.null y)) then Just y else Nothing)) <?> "String contains CRUD"
