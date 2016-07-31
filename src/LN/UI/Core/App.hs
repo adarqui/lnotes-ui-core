@@ -302,27 +302,30 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
-    -- load_organizations_forums_boards_index org_sid forum_sid = do
-    --   void load_organization
-    --   void load_forums_index
-    --   void load_boards_index
-    --   next
+    load_organizations_forums_boards_index :: MonadIO m => CoreM m CoreResult
+    load_organizations_forums_boards_index = do
+      void load_organization
+      void load_forums_index
+      void load_boards_index
+      next
 
-    -- cantLoad_organizations_forums_boards_index = do
-    --   void cantLoad_organization
-    --   void cantLoad_forums_index
-    --   void cantLoad_boards_index
-    --   done
+    cantLoad_organizations_forums_boards_index :: MonadIO m => CoreM m CoreResult
+    cantLoad_organizations_forums_boards_index = do
+      void cantLoad_organization
+      void cantLoad_forums_index
+      void cantLoad_boards_index
+      done
 
-    -- fetch_organizations_forums_boards_index org_sid forum_sid = do
-    --   done
-    --   Store{..} <- get
-    --   case (_l_m_organization, _l_forums, _l_boards) of
-    --     (Loading, _, _)                -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next next
-    --     (Loaded _, Loading, _)         -> fetch_forums_index         >>= \core_result_ -> basedOn_ core_result_ start next next
-    --     (Loaded _, Loaded _, Loading)  -> fetch_boards_index         >>= \core_result_ -> basedOn_ core_result_ start next next
-    --     (Loaded _, Loaded _, Loaded _) -> done
-    --     _                              -> cantLoad_organizations_forums_boards_index
+    fetch_organizations_forums_boards_index :: MonadIO m => OrganizationName -> ForumName -> CoreM m CoreResult
+    fetch_organizations_forums_boards_index org_sid forum_sid = do
+      done
+      Store{..} <- get
+      case (_l_m_organization, _l_forums, _l_boards) of
+        (Loading, _, _)                -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded _, Loading, _)         -> fetch_forums_index         >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded _, Loaded _, Loading)  -> fetch_boards_index         >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded _, Loaded _, Loaded _) -> done
+        _                              -> cantLoad_organizations_forums_boards_index
 
 
 
