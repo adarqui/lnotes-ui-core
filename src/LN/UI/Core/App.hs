@@ -346,6 +346,7 @@ runCore st core_result action         = runCoreM st $ do
         (Loaded _, Loaded (Just _), Loading)  -> fetch_boards_index         >>= \core_result_ -> basedOn_ core_result_ start next next
         (Loaded _, Loaded _, Loaded _) -> done
         _                              -> cantLoad_organizations_forums_boards_index
+        -- TODO ADD recent posts, messages of the week, etc
 
 
 
