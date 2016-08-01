@@ -459,7 +459,6 @@ runCore st core_result action         = runCoreM st $ do
 
     fetch_organizations_forums_boards_index :: MonadIO m => OrganizationName -> ForumName -> CoreM m CoreResult
     fetch_organizations_forums_boards_index org_sid forum_sid = do
-      done
       Store{..} <- get
       case (_l_m_organization, _l_m_forum, _l_boards) of
         (Loading, _, _)                      -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next next
