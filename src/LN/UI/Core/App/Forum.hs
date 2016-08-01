@@ -91,14 +91,14 @@ setTag request@ForumRequest{..} input =
      })
 
 
-addTag :: ForumRequest -> Maybe Text -> Action
-addTag request@ForumRequest{..} m_tag =
+addTag :: ForumRequest -> Action
+addTag request@ForumRequest{..} =
   ApplyState (\st->
     st{
       _m_forumRequest = Just $! request{forumRequestTags = tags, forumRequestStateTag = Nothing}
     })
   where
-  (tags, _) = Tag.addTag forumRequestTags m_tag
+  (tags, _) = Tag.addTag forumRequestTags forumRequestStateTag
 
 
 
