@@ -90,9 +90,15 @@ runCore st core_result action         = runCoreM st $ do
     RouteWith (Organizations (EditS org_sid)) _   -> basedOn load_organization (fetch_organization org_sid)
     RouteWith (Organizations (DeleteS org_sid)) _ -> basedOn load_organization (fetch_organization org_sid)
 
-    RouteWith (OrganizationsForums org_sid New) _                -> basedOn load_organizations_forums_new (fetch_organizations_forums_new org_sid)
-    RouteWith (OrganizationsForums org_sid Index) _              -> basedOn load_organizations_forums_index (fetch_organizations_forums_index org_sid)
-    RouteWith (OrganizationsForums org_sid (ShowS forum_sid)) _  -> basedOn load_organizations_forums_boards_index (fetch_organizations_forums_boards_index org_sid forum_sid)
+    RouteWith (OrganizationsForums org_sid New) _                 -> basedOn load_organizations_forums_new (fetch_organizations_forums_new org_sid)
+    RouteWith (OrganizationsForums org_sid Index) _               -> basedOn load_organizations_forums_index (fetch_organizations_forums_index org_sid)
+    RouteWith (OrganizationsForums org_sid (ShowS forum_sid)) _   -> basedOn load_board (fetch_board forum_sid)
+    RouteWith (OrganizationsForums org_sid (EditS forum_sid)) _   -> basedOn load_board (fetch_board forum_sid)
+    RouteWith (OrganizationsForums org_sid (DeleteS forum_sid)) _ -> basedOn load_board (fetch_board forum_sid)
+
+    -- RouteWith (OrganizationsForumsBoards org_sid forum_sid New) _                -> basedOn load_organizations_forums_boards_new (fetch_organizations_forums_boards_new org_sid forum_sid)
+    -- RouteWith (OrganizationsForumsBoards org_sid forum_sid Index) _              -> basedOn load_organizations_forums_boards_index (fetch_organizations_forums_boards_index org_sid forum_sid)
+    -- RouteWith (OrganizationsForumsBoards org_sid forum_sid (ShowS board_sid)) _  -> basedOn load_organizations_forums_boards_threads_index (fetch_organizations_boards_forums_boards_index org_sid forum_sid board_sid)
 
     RouteWith (Users Index) _              -> basedOn load_users_index fetch_users_index
     -- RouteWith (Users (ShowS user_sid)) _   -> start
