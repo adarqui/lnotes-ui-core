@@ -43,7 +43,7 @@ data Store = Store {
       , _l_forums                 :: !(Loader (Map ForumId ForumPackResponse))
       , _l_boards                 :: !(Loader (Map BoardId BoardPackResponse))
       , _l_threads                :: !(Loader (Map ThreadId ThreadPackResponse))
-      , _l_posts                  :: !(Loader (Map ThreadId ThreadPostPackResponse))
+      , _l_threadPosts            :: !(Loader (Map ThreadId ThreadPostPackResponse))
       , _l_m_organization         :: !(Loader (Maybe OrganizationPackResponse))
       , _m_organizationRequest    :: !(Maybe OrganizationRequest)
       , _m_organizationRequestTag :: !(Maybe Text)
@@ -74,7 +74,7 @@ defaultStore = Store {
       , _l_forums                 = Loaded Map.empty
       , _l_boards                 = Loaded Map.empty
       , _l_threads                = Loaded Map.empty
-      , _l_posts                  = Loaded Map.empty
+      , _l_threadPosts            = Loaded Map.empty
       , _l_m_organization         = Loaded Nothing
       , _m_organizationRequest    = Nothing
       , _m_organizationRequestTag = Nothing
