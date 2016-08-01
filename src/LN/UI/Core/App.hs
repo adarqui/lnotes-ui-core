@@ -92,9 +92,9 @@ runCore st core_result action         = runCoreM st $ do
 
     RouteWith (OrganizationsForums org_sid New) _                 -> basedOn load_organizations_forums_new (fetch_organizations_forums_new org_sid)
     RouteWith (OrganizationsForums org_sid Index) _               -> basedOn load_organizations_forums_index (fetch_organizations_forums_index org_sid)
-    RouteWith (OrganizationsForums org_sid (ShowS forum_sid)) _   -> basedOn load_forum (fetch_forum forum_sid)
-    RouteWith (OrganizationsForums org_sid (EditS forum_sid)) _   -> basedOn load_forum (fetch_forum forum_sid)
-    RouteWith (OrganizationsForums org_sid (DeleteS forum_sid)) _ -> basedOn load_forum (fetch_forum forum_sid)
+    RouteWith (OrganizationsForums org_sid (ShowS forum_sid)) _   -> basedOn load_organizations_forums_show (fetch_organizations_forums_show org_sid forum_sid)
+    RouteWith (OrganizationsForums org_sid (EditS forum_sid)) _   -> basedOn load_organizations_forums (fetch_organizations_forums org_sid forum_sid)
+    RouteWith (OrganizationsForums org_sid (DeleteS forum_sid)) _ -> basedOn load_organizations_forums (fetch_organizations_forums org_sid forum_sid)
 
     RouteWith (OrganizationsForumsBoards org_sid forum_sid New) _                 -> basedOn load_organizations_forums_boards_new (fetch_organizations_forums_boards_new org_sid forum_sid)
     RouteWith (OrganizationsForumsBoards org_sid forum_sid Index) _               -> basedOn load_organizations_forums_boards_index (fetch_organizations_forums_boards_index org_sid forum_sid)
@@ -375,31 +375,6 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
-    load_organizations_forums_index :: MonadIO m => CoreM m CoreResult
-    load_organizations_forums_index = do
-      void load_organization
-      void load_forums_index
-      next
-
-    cantLoad_organizations_forums_index :: MonadIO m => CoreM m CoreResult
-    cantLoad_organizations_forums_index = do
-      void cantLoad_organization
-      void cantLoad_forums_index
-      done
-
-    fetch_organizations_forums_index :: MonadIO m => OrganizationName -> CoreM m CoreResult
-    fetch_organizations_forums_index org_sid = do
-      Store{..} <- get
-      case (_l_m_organization, _l_forums) of
-        (Loading, _)         -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next next
-        (Loaded _, Loading)  -> fetch_forums_index         >>= \core_result_ -> basedOn_ core_result_ start next next
-        (Loaded _, Loaded _) -> done
-        _                    -> cantLoad_organizations_forums_index
-
-
-
-
-
     load_organizations_forums_new :: MonadIO m => CoreM m CoreResult
     load_organizations_forums_new = do
       void load_organization
@@ -422,26 +397,97 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
+    load_organizations_forums_index :: MonadIO m => CoreM m CoreResult
+    load_organizations_forums_index = do
+      void load_organization
+      void load_forums_index
+      next
+
+    cantLoad_organizations_forums_index :: MonadIO m => CoreM m CoreResult
+    cantLoad_organizations_forums_index = do
+      void cantLoad_organization
+      void cantLoad_forums_index
+      done
+
+    fetch_organizations_forums_index :: MonadIO m => OrganizationName -> CoreM m CoreResult
+    fetch_organizations_forums_index org_sid = do
+      result <- fetch_organization org_sid
+      doneDo result $ do
+        Store{..} <- get
+        case _l_forums of
+          Loading  -> fetch_forums_index >>= \core_result_ -> basedOn_ core_result_ start next next
+          Loaded _ -> done
+          _        -> cantLoad_organizations_forums_index
+
+
+
+    load_organizations_forums :: MonadIO m => CoreM m CoreResult
+    load_organizations_forums = do
+      void load_organization
+      void load_forum
+      next
+
+    cantLoad_organizations_forums :: MonadIO m => CoreM m CoreResult
+    cantLoad_organizations_forums = do
+      void cantLoad_organization
+      void cantLoad_forum
+      done
+
+    fetch_organizations_forums :: MonadIO m => OrganizationName -> ForumName -> CoreM m CoreResult
+    fetch_organizations_forums org_sid forum_sid = do
+      result <- fetch_organization org_sid
+      doneDo result $ do
+        Store{..} <- get
+        case _l_m_organization of
+          Loading   -> fetch_forum forum_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+          Loaded _  -> done
+          _         -> cantLoad_organizations_forums
+
+
+
+    load_organizations_forums_show :: MonadIO m => CoreM m CoreResult
+    load_organizations_forums_show = do
+      void load_organization
+      void load_forum
+      next
+
+    cantLoad_organizations_forums_show :: MonadIO m => CoreM m CoreResult
+    cantLoad_organizations_forums_show = do
+      void cantLoad_organization
+      void cantLoad_forum
+      done
+
+    fetch_organizations_forums_show :: MonadIO m => OrganizationName -> ForumName -> CoreM m CoreResult
+    fetch_organizations_forums_show org_sid forum_sid = do
+      result <- fetch_organization org_sid
+      doneDo result $ do
+        Store{..} <- get
+        case _l_m_organization of
+          Loading   -> fetch_forum forum_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+          Loaded _  -> done
+          _         -> cantLoad_organizations_forums
+
+
+
+
 
 
     load_organizations_forums_boards_new :: MonadIO m => CoreM m CoreResult
     load_organizations_forums_boards_new = do
-      load_organization
-      load_forum
+      cantLoad_organizations_forums_new
       load_boards_new
       next
 
     cantLoad_organizations_forums_boards_new :: MonadIO m => CoreM m CoreResult
     cantLoad_organizations_forums_boards_new = do
-      cantLoad_organization
-      cantLoad_forums_new
+      cantLoad_organizations_forums_new
       cantLoad_boards_new
       done
 
     fetch_organizations_forums_boards_new :: MonadIO m => OrganizationName -> ForumName -> CoreM m CoreResult
     fetch_organizations_forums_boards_new org_sid forum_sid = do
-      r1 <- fetch_organizations_forums_new org_sid
-      doneDo r1 $ do
+      result <- fetch_organizations_forums_new org_sid
+      doneDo result $ do
         Store{..} <- get
         case _l_m_forum of
           Loading -> fetch_forum forum_sid >>= \core_result_ -> basedOn_ core_result_ start next next
@@ -451,28 +497,26 @@ runCore st core_result action         = runCoreM st $ do
 
     load_organizations_forums_boards_index :: MonadIO m => CoreM m CoreResult
     load_organizations_forums_boards_index = do
-      load_organization
-      load_forum
+      load_organizations_forums_boards_new
       load_boards
       next
 
     cantLoad_organizations_forums_boards_index :: MonadIO m => CoreM m CoreResult
     cantLoad_organizations_forums_boards_index = do
-      cantLoad_organization
-      cantLoad_forum
+      cantLoad_organizations_forums_boards_new
       cantLoad_boards
       done
 
     fetch_organizations_forums_boards_index :: MonadIO m => OrganizationName -> ForumName -> CoreM m CoreResult
     fetch_organizations_forums_boards_index org_sid forum_sid = do
-      Store{..} <- get
-      case (_l_m_organization, _l_m_forum, _l_boards) of
-        (Loading, _, _)                      -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next next
-        (Loaded _, Loading, _)               -> fetch_forum forum_sid >>= \core_result_ -> basedOn_ core_result_ start next next
-        (Loaded _, Loaded (Just _), Loading) -> fetch_boards >>= \core_result_ -> basedOn_ core_result_ start next next
-        (Loaded _, Loaded _, Loaded _)       -> done
-        _                                    -> cantLoad_organizations_forums_boards_index
-        -- TODO ADD recent posts, messages of the week, etc
+      result <- fetch_organizations_forums_boards_new org_sid forum_sid
+      doneDo result $ do
+        Store{..} <- get
+        case _l_boards of
+          Loading   -> fetch_boards >>= \core_result_ -> basedOn_ core_result_ start next next
+          Loaded _  -> done
+          _         -> cantLoad_organizations_forums_boards_index
+          -- TODO ADD recent posts, messages of the week, etc
 
 
 
@@ -480,16 +524,14 @@ runCore st core_result action         = runCoreM st $ do
 
     load_organizations_forums_boards_threads_new :: MonadIO m => CoreM m CoreResult
     load_organizations_forums_boards_threads_new = do
-      load_organization
-      load_forum
-      load_boards_new
+      load_organizations_forums_boards_new
+--      cantLoad_thread
       next
 
     cantLoad_organizations_forums_boards_threads_new :: MonadIO m => CoreM m CoreResult
     cantLoad_organizations_forums_boards_threads_new = do
-      cantLoad_organization
-      cantLoad_forums_new
-      cantLoad_boards_new
+      cantLoad_organizations_forums_boards_new
+--      cantLoad_thread
       done
 
     fetch_organizations_forums_boards_threads_new :: MonadIO m => OrganizationName -> ForumName -> BoardName -> CoreM m CoreResult
@@ -505,17 +547,13 @@ runCore st core_result action         = runCoreM st $ do
 
     load_organizations_forums_boards_threads_index :: MonadIO m => CoreM m CoreResult
     load_organizations_forums_boards_threads_index = do
-      load_organization
-      load_forum
-      load_boards
+      load_organizations_forums_boards_threads_new
       load_threads
       next
 
     cantLoad_organizations_forums_boards_threads_index :: MonadIO m => CoreM m CoreResult
     cantLoad_organizations_forums_boards_threads_index = do
-      cantLoad_organization
-      cantLoad_forum
-      cantLoad_boards
+      cantLoad_organizations_forums_boards_new
       cantLoad_threads
       done
 
