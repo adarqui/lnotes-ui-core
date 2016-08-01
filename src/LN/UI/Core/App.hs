@@ -98,9 +98,15 @@ runCore st core_result action         = runCoreM st $ do
 
     RouteWith (OrganizationsForumsBoards org_sid forum_sid New) _                 -> basedOn load_organizations_forums_boards_new (fetch_organizations_forums_boards_new org_sid forum_sid)
     RouteWith (OrganizationsForumsBoards org_sid forum_sid Index) _               -> basedOn load_organizations_forums_boards_index (fetch_organizations_forums_boards_index org_sid forum_sid)
-    RouteWith (OrganizationsForumsBoards org_sid forum_sid (ShowS board_sid)) _   -> basedOn load_board (fetch_board board_sid)
-    RouteWith (OrganizationsForumsBoards org_sid forum_sid (EditS board_sid)) _   -> basedOn load_board (fetch_board board_sid)
-    RouteWith (OrganizationsForumsBoards org_sid forum_sid (DeleteS board_sid)) _ -> basedOn load_board (fetch_board board_sid)
+    RouteWith (OrganizationsForumsBoards org_sid forum_sid (ShowS board_sid)) _   -> basedOn load_organizations_forums_boards_show (fetch_organizations_forums_boards_show org_sid forum_sid board_sid)
+    RouteWith (OrganizationsForumsBoards org_sid forum_sid (EditS board_sid)) _   -> basedOn load_organizations_forums_boards (fetch_organizations_forums_boards org_sid forum_sid board_sid)
+    RouteWith (OrganizationsForumsBoards org_sid forum_sid (DeleteS board_sid)) _ -> basedOn load_organizations_forums_boards (fetch_organizations_forums_boards org_sid forum_sid board_sid)
+
+    RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid New) _                  -> basedOn load_organizations_forums_boards_threads_new (fetch_organizations_forums_boards_threads_new org_sid forum_sid board_sid)
+    RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid Index) _                -> basedOn load_organizations_forums_boards_threads_index (fetch_organizations_forums_boards_threads_index org_sid forum_sid board_sid)
+    -- RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid (ShowS thread_sid)) _   -> basedOn load_organizations_forums_boards_threads_show (fetch_organizations_forums_boards_show org_sid forum_sid board_sid thread_sid)
+    -- RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid (EditS thread_sid)) _   -> basedOn load_organizations_forums_boards_threads (fetch_organizations_forums_boards_threads org_sid forum_sid board_sid thread_sid)
+    -- RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid (DeleteS thread_sid)) _ -> basedOn load_organizations_forums_boards_threads (fetch_organizations_forums_boards_threads org_sid forum_sid board_sid thread_sid)
 
     RouteWith (Users Index) _              -> basedOn load_users_index fetch_users_index
     -- RouteWith (Users (ShowS user_sid)) _   -> start
@@ -517,6 +523,56 @@ runCore st core_result action         = runCoreM st $ do
           Loaded _  -> done
           _         -> cantLoad_organizations_forums_boards_index
           -- TODO ADD recent posts, messages of the week, etc
+
+
+
+    load_organizations_forums_boards :: MonadIO m => CoreM m CoreResult
+    load_organizations_forums_boards = do
+      void load_organization
+      void load_forum
+      next
+
+    cantLoad_organizations_forums_boards :: MonadIO m => CoreM m CoreResult
+    cantLoad_organizations_forums_boards = do
+      void cantLoad_organization
+      void cantLoad_forum
+      done
+
+    fetch_organizations_forums_boards :: MonadIO m => OrganizationName -> ForumName -> BoardName -> CoreM m CoreResult
+    fetch_organizations_forums_boards org_sid forum_sid board_sid = do
+      result <- fetch_organizations_forums org_sid forum_sid
+      doneDo result $ do
+        Store{..} <- get
+        case _l_m_forum of
+          Loading   -> fetch_board board_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+          Loaded _  -> done
+          _         -> cantLoad_organizations_forums_boards
+
+
+
+    load_organizations_forums_boards_show :: MonadIO m => CoreM m CoreResult
+    load_organizations_forums_boards_show = do
+      void load_organization
+      void load_forum
+      next
+
+    cantLoad_organizations_forums_boards_show :: MonadIO m => CoreM m CoreResult
+    cantLoad_organizations_forums_boards_show = do
+      void cantLoad_organization
+      void cantLoad_forum
+      done
+
+    fetch_organizations_forums_boards_show :: MonadIO m => OrganizationName -> ForumName -> BoardName -> CoreM m CoreResult
+    fetch_organizations_forums_boards_show org_sid forum_sid board_sid = do
+      result <- fetch_organizations_forums_boards org_sid forum_sid board_sid
+      doneDo result $ do
+        Store{..} <- get
+        case _l_m_board of
+          Loading   -> fetch_threads >>= \core_result_ -> basedOn_ core_result_ start next next
+          Loaded _  -> done
+          _         -> cantLoad_organizations_forums_boards_show
+
+
 
 
 
