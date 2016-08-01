@@ -73,8 +73,7 @@ setTag :: OrganizationRequest -> Text -> Action
 setTag request@OrganizationRequest{..} input =
    ApplyState (\st->
      st{
-       _m_organizationRequest = Just $! request
-     , _m_organizationRequestTag = Just $! input
+       _m_organizationRequest = Just $! request{organizationRequestStateTag = Just input}
      })
 
 
@@ -82,8 +81,7 @@ addTag :: OrganizationRequest -> Maybe Text -> Action
 addTag request@OrganizationRequest{..} m_tag =
   ApplyState (\st->
     st{
-      _m_organizationRequest = Just $! request{organizationRequestTags = tags}
-    , _m_organizationRequestTag = Nothing
+      _m_organizationRequest = Just $! request{organizationRequestTags = tags, organizationRequestStateTag = Nothing}
     })
   where
   (tags, _) = Tag.addTag organizationRequestTags m_tag
