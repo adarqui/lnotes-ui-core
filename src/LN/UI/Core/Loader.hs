@@ -16,6 +16,7 @@ module LN.UI.Core.Loader (
   loader3,
   loader3_,
   loader4,
+  loader5,
   loading
 ) where
 
@@ -110,3 +111,11 @@ loader4 loading_v1 loading_v2 loading_v3 loading_v4 loaded =
     (_, _, Loading, _)                   -> loading
     (_, _, _, Loading)                   -> loading
     _                                    -> cantLoad
+
+
+
+
+loader5 :: forall m v1 v2 v3 v4 v5. HasLoader m => Loader v1 -> Loader v2 -> Loader v3 -> Loader v4 -> Loader v5 -> (v1 -> v2 -> v3 -> v4 -> v5 -> m) -> m
+loader5 loading_v1 loading_v2 loading_v3 loading_v4 loading_v5 loaded =
+  loader4 loading_v1 loading_v2 loading_v3 loading_v4 $ \v1 v2 v3 v4 -> do
+    loader1 loading_v5 (loaded v1 v2 v3 v4)
