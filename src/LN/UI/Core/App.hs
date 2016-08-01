@@ -144,7 +144,10 @@ runCore st core_result action         = runCoreM st $ do
       rehtie lr (const cantLoad_organization) $ \organization@OrganizationPackResponse{..} -> do
         modify (\st'->st'{
             _l_m_organization = Loaded $ Just organization
-          , _m_organizationRequest = Just $ organizationResponseToOrganizationRequest organizationPackResponseOrganization
+          , _m_organizationRequest =
+            Just $ organizationResponseToOrganizationRequest
+                     Nothing -- unused state
+                     organizationPackResponseOrganization
         })
         done
 
