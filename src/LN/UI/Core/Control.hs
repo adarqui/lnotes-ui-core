@@ -13,6 +13,7 @@ module LN.UI.Core.Control (
   , done
   , failure
   , reroute
+  , doneDo
   , unit
 ) where
 
@@ -69,6 +70,12 @@ failure = pure Failure
 
 reroute :: Monad m => RouteWith -> m CoreResult
 reroute r = pure $ Reroute r
+
+
+
+doneDo :: Monad m => CoreResult -> m CoreResult -> m CoreResult
+doneDo Done act = act
+doneDo result _ = pure result
 
 
 

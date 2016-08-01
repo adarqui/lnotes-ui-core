@@ -92,13 +92,15 @@ runCore st core_result action         = runCoreM st $ do
 
     RouteWith (OrganizationsForums org_sid New) _                 -> basedOn load_organizations_forums_new (fetch_organizations_forums_new org_sid)
     RouteWith (OrganizationsForums org_sid Index) _               -> basedOn load_organizations_forums_index (fetch_organizations_forums_index org_sid)
-    RouteWith (OrganizationsForums org_sid (ShowS forum_sid)) _   -> basedOn load_board (fetch_board forum_sid)
-    RouteWith (OrganizationsForums org_sid (EditS forum_sid)) _   -> basedOn load_board (fetch_board forum_sid)
-    RouteWith (OrganizationsForums org_sid (DeleteS forum_sid)) _ -> basedOn load_board (fetch_board forum_sid)
+    RouteWith (OrganizationsForums org_sid (ShowS forum_sid)) _   -> basedOn load_forum (fetch_forum forum_sid)
+    RouteWith (OrganizationsForums org_sid (EditS forum_sid)) _   -> basedOn load_forum (fetch_forum forum_sid)
+    RouteWith (OrganizationsForums org_sid (DeleteS forum_sid)) _ -> basedOn load_forum (fetch_forum forum_sid)
 
-    -- RouteWith (OrganizationsForumsBoards org_sid forum_sid New) _                -> basedOn load_organizations_forums_boards_new (fetch_organizations_forums_boards_new org_sid forum_sid)
-    -- RouteWith (OrganizationsForumsBoards org_sid forum_sid Index) _              -> basedOn load_organizations_forums_boards_index (fetch_organizations_forums_boards_index org_sid forum_sid)
-    -- RouteWith (OrganizationsForumsBoards org_sid forum_sid (ShowS board_sid)) _  -> basedOn load_organizations_forums_boards_threads_index (fetch_organizations_boards_forums_boards_index org_sid forum_sid board_sid)
+    RouteWith (OrganizationsForumsBoards org_sid forum_sid New) _                 -> basedOn load_organizations_forums_boards_new (fetch_organizations_forums_boards_new org_sid forum_sid)
+    RouteWith (OrganizationsForumsBoards org_sid forum_sid Index) _               -> basedOn load_organizations_forums_boards_index (fetch_organizations_forums_boards_index org_sid forum_sid)
+    RouteWith (OrganizationsForumsBoards org_sid forum_sid (ShowS board_sid)) _   -> basedOn load_board (fetch_board board_sid)
+    RouteWith (OrganizationsForumsBoards org_sid forum_sid (EditS board_sid)) _   -> basedOn load_board (fetch_board board_sid)
+    RouteWith (OrganizationsForumsBoards org_sid forum_sid (DeleteS board_sid)) _ -> basedOn load_board (fetch_board board_sid)
 
     RouteWith (Users Index) _              -> basedOn load_users_index fetch_users_index
     -- RouteWith (Users (ShowS user_sid)) _   -> start
@@ -416,6 +418,31 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
+    load_organizations_forums_boards_new :: MonadIO m => CoreM m CoreResult
+    load_organizations_forums_boards_new = do
+      load_organization
+      load_forum
+      load_boards_new
+      next
+
+    cantLoad_organizations_forums_boards_new :: MonadIO m => CoreM m CoreResult
+    cantLoad_organizations_forums_boards_new = do
+      cantLoad_organization
+      cantLoad_forums_new
+      cantLoad_boards_new
+      done
+
+    fetch_organizations_forums_boards_new :: MonadIO m => OrganizationName -> ForumName -> CoreM m CoreResult
+    fetch_organizations_forums_boards_new org_sid forum_sid = do
+      r1 <- fetch_organizations_forums_new org_sid
+      doneDo r1 $ do
+        Store{..} <- get
+        case _l_m_forum of
+          Loading -> fetch_forum forum_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+          _       -> cantLoad_organizations_forums_boards_new
+
+
+
     load_organizations_forums_boards_index :: MonadIO m => CoreM m CoreResult
     load_organizations_forums_boards_index = do
       load_organization
@@ -473,7 +500,7 @@ runCore st core_result action         = runCoreM st $ do
         (Loaded _, Loaded _, Loaded (Just _), Loading) -> fetch_threads >>= \core_result_ -> basedOn_ core_result_ start next next
         (Loaded _, Loaded _, Loaded _, Loaded _)       -> done
 
-        _                              -> cantLoad_organizations_forums_boards_threads_index
+        _                                              -> cantLoad_organizations_forums_boards_threads_index
 
 
 
