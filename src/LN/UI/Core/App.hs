@@ -726,20 +726,24 @@ runCore st core_result action         = runCoreM st $ do
       RouteWith (Users _) _                                  -> done
       RouteWith (OrganizationsForums _ _) _                  -> act_save_forum
       RouteWith (OrganizationsForumsBoards _ _ _) _          -> act_save_board
-      -- RouteWith (OrganizationsForumsBoardsThreads _ _) _     -> act_save_thread
+      RouteWith (OrganizationsForumsBoardsThreads _ _ _ _) _ -> act_save_thread
       -- RouteWith (OrganizationsForumsBoardsThreadPosts _ _) _ -> act_save_thread_post
       _ -> done
 
     where
+    act_save_organization :: MonadIO m => CoreM m CoreResult
     act_save_organization = do
       Store{..} <- get
       case (_l_m_me, _m_organizationRequest) of
         (Loaded (Just UserResponse{..}), Just request) -> do
-          lr <- api $ postOrganization' (request { organizationRequestEmail = userResponseEmail })
+          lr <- case _l_m_organization of
+                  Loaded (Just OrganizationPackResponse{..}) -> api $ putOrganization' organizationPackResponseOrganizationId request
+                  _                                          -> api $ postOrganization' (request { organizationRequestEmail = userResponseEmail })
           rehtie lr (const done) $ \OrganizationResponse{..} -> do
             reroute $ RouteWith (Organizations (ShowS organizationResponseName)) emptyParams
         _ ->  done
 
+    act_save_forum :: MonadIO m => CoreM m CoreResult
     act_save_forum = do
       Store{..} <- get
       case (_l_m_organization, _m_forumRequest) of
@@ -751,6 +755,7 @@ runCore st core_result action         = runCoreM st $ do
             reroute $ RouteWith (OrganizationsForums (organizationResponseName organizationPackResponseOrganization) (ShowS forumResponseName)) emptyParams
         _ -> done
 
+    act_save_board :: MonadIO m => CoreM m CoreResult
     act_save_board = do
       Store{..} <- get
       case (_l_m_organization, _l_m_forum, _m_boardRequest) of
@@ -760,4 +765,16 @@ runCore st core_result action         = runCoreM st $ do
                   _                                   -> api $ postBoard_ByForumId' forumPackResponseForumId request
           rehtie lr (const done) $ \BoardResponse{..} -> do
             reroute $ RouteWith (OrganizationsForumsBoards (organizationResponseName organizationPackResponseOrganization) (forumResponseName forumPackResponseForum) (ShowS boardResponseName)) emptyParams
+        _ -> done
+
+    act_save_thread :: MonadIO m => CoreM m CoreResult
+    act_save_thread = do
+      Store{..} <- get
+      case (_l_m_organization, _l_m_forum, _l_m_board, _m_threadRequest) of
+        (Loaded (Just OrganizationPackResponse{..}), Loaded (Just ForumPackResponse{..}), Loaded (Just BoardPackResponse{..}), Just request) -> do
+          lr <- case _l_m_thread of
+                  Loaded (Just ThreadPackResponse{..}) -> api $ putThread' threadPackResponseThreadId request
+                  _                                    -> api $ postThread_ByBoardId' boardPackResponseBoardId request
+          rehtie lr (const done) $ \ThreadResponse{..} -> do
+            reroute $ RouteWith (OrganizationsForumsBoardsThreads (organizationResponseName organizationPackResponseOrganization) (forumResponseName forumPackResponseForum) (boardResponseName boardPackResponseBoard) (ShowS threadResponseName)) emptyParams
         _ -> done
