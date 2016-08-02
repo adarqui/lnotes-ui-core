@@ -190,7 +190,7 @@ instance PathInfo Route where
     Portal                   -> pure "portal"
     Organizations Index      -> pure "organizations"
     Organizations (ShowS s)  -> pure s
-    Organizations crud       -> (pure $ "organizations") <> toPathSegments crud
+    Organizations crud       -> (pure "organizations") <> toPathSegments crud
     OrganizationsForums org_sid Index -> (pure org_sid) <> pure "f"
     OrganizationsForums org_sid crud -> (pure org_sid) <> pure "f" <> toPathSegments crud
     OrganizationsForumsBoards org_sid forum_sid Index -> (pure org_sid) <> pure "f" <> pure forum_sid
