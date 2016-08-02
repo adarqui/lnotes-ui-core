@@ -20,34 +20,32 @@ module LN.UI.Core.Router.Route (
 
 
 
-import           Control.Applicative                      ((*>), (<$), (<$>),
-                                                           (<*>), (<|>))
-import           Control.DeepSeq                          (NFData)
-import           Data.ByteString.Char8                    (ByteString)
-import qualified Data.ByteString.Char8                    as BSC
-import           Data.Either                              (Either (..))
-import qualified Data.Map                                 as Map
-import           Data.Maybe                               (Maybe (Just))
-import           Data.Monoid                              (mempty, (<>))
-import           Data.Text                                (Text)
-import           Prelude                                  (Eq, Int, Show, fmap,
-                                                           map, pure, ($), (.),
-                                                           (==), (>>=))
-import           Text.Parsec.Prim                         (try, (<?>))
+import           Control.Applicative          ((*>), (<$), (<$>), (<*>), (<|>))
+import           Control.DeepSeq              (NFData)
+import           Data.ByteString.Char8        (ByteString)
+import qualified Data.ByteString.Char8        as BSC
+import           Data.Either                  (rights)
+import           Data.Either                  (Either (..))
+import           Data.List                    (scanl)
+import qualified Data.Map                     as Map
+import           Data.Maybe                   (Maybe (Just))
+import           Data.Monoid                  (mempty, (<>))
+import           Data.Text                    (Text)
+import           Haskell.Api.Helpers.Shared   (qp)
+import           Prelude                      (Eq, Int, Show, fmap, map, pure,
+                                               ($), (.), (==), (>>=))
+import           Text.Parsec.Prim             (try, (<?>))
 import           Web.Routes
 
-import           Haskell.Api.Helpers.Shared               (qp)
 import           LN.T
-import           LN.UI.Core.Helpers.GHCJS                 (JSString,
-                                                           textToJSString')
-import           LN.UI.Core.Helpers.WebRoutes             (notCRUD, notCRUDstr1,
-                                                           str1)
-import           LN.UI.Core.Router.CRUD                   (CRUD (..))
-import           LN.UI.Core.Router.Crumb                  (HasCrumb, crumb)
-import           LN.UI.Core.Router.LinkName               (HasLinkName,
-                                                           linkName)
-import           LN.UI.Core.Router.Param                  (Params, buildParams,
-                                                           fromWebRoutesParams)
+import           LN.UI.Core.Helpers.DataList  (tailFriendly)
+import           LN.UI.Core.Helpers.GHCJS     (JSString, textToJSString')
+import           LN.UI.Core.Helpers.WebRoutes (notCRUD, notCRUDstr1, str1)
+import           LN.UI.Core.Router.CRUD       (CRUD (..))
+import           LN.UI.Core.Router.Crumb      (HasCrumb, crumb)
+import           LN.UI.Core.Router.LinkName   (HasLinkName, linkName)
+import           LN.UI.Core.Router.Param      (Params, buildParams,
+                                               fromWebRoutesParams)
 
 
 
@@ -162,44 +160,24 @@ instance HasLinkName RouteWith where
 
 instance HasCrumb Route where
 
-  crumb route =
-    case route of
-       Home   -> []
-       About  -> []
-       Me     -> []
-       Errors -> []
-       Portal -> []
-
-       Organizations Index             -> []
-       Organizations New               -> [Organizations Index]
-       Organizations (ShowS _)         -> [Organizations Index]
-       Organizations (EditS org_sid)   -> organizations_repetitive org_sid
-       Organizations (DeleteS org_sid) -> organizations_repetitive org_sid
-
-       OrganizationsForums org_sid Index               -> []
-       OrganizationsForums org_sid New                 -> [Organizations Index]
-       OrganizationsForums org_sid (ShowS forum_sid)   -> [Organizations Index]
-       OrganizationsForums org_sid (EditS forum_sid)   -> organizations_forums_repetitive org_sid forum_sid
-       OrganizationsForums org_sid (DeleteS forum_sid) -> organizations_forums_repetitive org_sid forum_sid
-
-       -- TODO FIXME: Remove eventually, needs to be accurately total
-       _ -> [NotFound]
-
+  crumb route = maybe_organizations_index <> routes
     where
-    organizations_repetitive org_sid =
-      [ Organizations Index
-      , Organizations (ShowS org_sid) ]
+    segments                   = toPathSegments route
+    segment_buckets            = tailFriendly $ scanl (\acc x -> acc <> [x]) [] segments
+    routes                     = rights $ map (parseSegments fromPathSegments) segment_buckets
+    maybe_organizations_index =
+      case routes of
+        (r:_) -> case r of
+          Organizations Index                             -> []
+          Organizations _                                 -> [Organizations Index]
+          OrganizationsForums _ _                         -> [Organizations Index]
+          OrganizationsForumsBoards _ _ _                 -> [Organizations Index]
+          OrganizationsForumsBoardsThreads _ _ _ _        -> [Organizations Index]
+          OrganizationsForumsBoardsThreadsPosts _ _ _ _ _ -> [Organizations Index]
+          _                                               -> []
 
-    organizations_forums_repetitive org_sid forum_sid =
-      organizations_repetitive org_sid
-      <> [ OrganizationsForums org_sid Index
-         , OrganizationsForums org_sid (ShowS forum_sid) ]
+        _     -> []
 
-    organizations_forums_boards_repetitive org_sid forum_sid board_sid =
-      organizations_repetitive org_sid
-      <> organizations_forums_repetitive org_sid forum_sid
-      <> [ OrganizationsForumsBoards org_sid forum_sid Index
-         , OrganizationsForumsBoards org_sid forum_sid (ShowS board_sid) ]
 
 
 instance PathInfo Route where
