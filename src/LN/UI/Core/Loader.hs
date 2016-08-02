@@ -10,11 +10,11 @@ module LN.UI.Core.Loader (
   loading,
   cantLoad,
   loader1,
-  loader1_,
+  maybeLoader1,
   loader2,
-  loader2_,
+  maybeLoader2,
   loader3,
-  loader3_,
+  maybeLoader3,
   loader4,
   loader5,
   loading
@@ -51,8 +51,8 @@ loader1 loading_v loaded =
 
 
 
-loader1_ :: forall m v. HasLoader m => Loader (Maybe v) -> (v -> m) -> m
-loader1_ loading_v loaded =
+maybeLoader1 :: forall m v. HasLoader m => Loader (Maybe v) -> (v -> m) -> m
+maybeLoader1 loading_v loaded =
   case loading_v of
     Loaded (Just v) -> loaded v
     Loading         -> loading
@@ -70,8 +70,8 @@ loader2 loading_v1 loading_v2 loaded =
 
 
 
-loader2_ :: forall m v1 v2. HasLoader m => Loader (Maybe v1) -> Loader (Maybe v2) -> (v1 -> v2 -> m) -> m
-loader2_ loading_v1 loading_v2 loaded =
+maybeLoader2 :: forall m v1 v2. HasLoader m => Loader (Maybe v1) -> Loader (Maybe v2) -> (v1 -> v2 -> m) -> m
+maybeLoader2 loading_v1 loading_v2 loaded =
   case (loading_v1, loading_v2) of
     (Loaded (Just v1), Loaded (Just v2)) -> loaded v1 v2
     (Loading, _)                         -> loading
@@ -91,8 +91,8 @@ loader3 loading_v1 loading_v2 loading_v3 loaded =
 
 
 
-loader3_ :: forall m v1 v2 v3. HasLoader m => Loader (Maybe v1) -> Loader (Maybe v2) -> Loader (Maybe v3) -> (v1 -> v2 -> v3 -> m) -> m
-loader3_ loading_v1 loading_v2 loading_v3 loaded =
+maybeLoader3 :: forall m v1 v2 v3. HasLoader m => Loader (Maybe v1) -> Loader (Maybe v2) -> Loader (Maybe v3) -> (v1 -> v2 -> v3 -> m) -> m
+maybeLoader3 loading_v1 loading_v2 loading_v3 loaded =
   case (loading_v1, loading_v2, loading_v3) of
     (Loaded (Just v1), Loaded (Just v2), Loaded (Just v3)) -> loaded v1 v2 v3
     (Loading, _, _)                   -> loading
