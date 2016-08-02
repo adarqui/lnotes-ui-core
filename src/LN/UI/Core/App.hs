@@ -725,7 +725,7 @@ runCore st core_result action         = runCoreM st $ do
       RouteWith (Organizations _) _                          -> act_save_organization
       RouteWith (Users _) _                                  -> done
       RouteWith (OrganizationsForums _ _) _                  -> act_save_forum
-      -- RouteWith (OrganizationsForumsBoards _ _) _            -> act_save_board
+      RouteWith (OrganizationsForumsBoards _ _ _) _          -> act_save_board
       -- RouteWith (OrganizationsForumsBoardsThreads _ _) _     -> act_save_thread
       -- RouteWith (OrganizationsForumsBoardsThreadPosts _ _) _ -> act_save_thread_post
       _ -> done
@@ -749,4 +749,15 @@ runCore st core_result action         = runCoreM st $ do
                   _                                   -> api $ postForum_ByOrganizationId' organizationPackResponseOrganizationId request
           rehtie lr (const done) $ \ForumResponse{..} -> do
             reroute $ RouteWith (OrganizationsForums (organizationResponseName organizationPackResponseOrganization) (ShowS forumResponseName)) emptyParams
+        _ -> done
+
+    act_save_board = do
+      Store{..} <- get
+      case (_l_m_organization, _l_m_forum, _m_boardRequest) of
+        (Loaded (Just OrganizationPackResponse{..}), Loaded (Just ForumPackResponse{..}), Just request) -> do
+          lr <- case _l_m_board of
+                  Loaded (Just BoardPackResponse{..}) -> api $ putBoard' boardPackResponseBoardId request
+                  _                                   -> api $ postBoard_ByForumId' forumPackResponseForumId request
+          rehtie lr (const done) $ \BoardResponse{..} -> do
+            reroute $ RouteWith (OrganizationsForumsBoards (organizationResponseName organizationPackResponseOrganization) (forumResponseName forumPackResponseForum) (ShowS boardResponseName)) emptyParams
         _ -> done
