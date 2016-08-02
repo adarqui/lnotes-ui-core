@@ -176,6 +176,12 @@ instance HasCrumb Route where
        Organizations (EditS org_sid)   -> organizations_repetitive org_sid
        Organizations (DeleteS org_sid) -> organizations_repetitive org_sid
 
+       OrganizationsForums org_sid Index               -> []
+       OrganizationsForums org_sid New                 -> [Organizations Index]
+       OrganizationsForums org_sid (ShowS forum_sid)   -> [Organizations Index]
+       OrganizationsForums org_sid (EditS forum_sid)   -> organizations_forums_repetitive org_sid forum_sid
+       OrganizationsForums org_sid (DeleteS forum_sid) -> organizations_forums_repetitive org_sid forum_sid
+
        -- TODO FIXME: Remove eventually, needs to be accurately total
        _ -> [NotFound]
 
@@ -184,6 +190,16 @@ instance HasCrumb Route where
       [ Organizations Index
       , Organizations (ShowS org_sid) ]
 
+    organizations_forums_repetitive org_sid forum_sid =
+      organizations_repetitive org_sid
+      <> [ OrganizationsForums org_sid Index
+         , OrganizationsForums org_sid (ShowS forum_sid) ]
+
+    organizations_forums_boards_repetitive org_sid forum_sid board_sid =
+      organizations_repetitive org_sid
+      <> organizations_forums_repetitive org_sid forum_sid
+      <> [ OrganizationsForumsBoards org_sid forum_sid Index
+         , OrganizationsForumsBoards org_sid forum_sid (ShowS board_sid) ]
 
 
 instance PathInfo Route where

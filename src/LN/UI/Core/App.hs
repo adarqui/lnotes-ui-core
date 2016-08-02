@@ -722,9 +722,12 @@ runCore st core_result action         = runCoreM st $ do
   act_save = do
     route_with <- gets _route
     case route_with of
-      RouteWith (Organizations _) _ -> act_save_organization
-      RouteWith (Users _) _         -> done
-      RouteWith (OrganizationsForums _ _) _ -> done
+      RouteWith (Organizations _) _                          -> act_save_organization
+      RouteWith (Users _) _                                  -> done
+      RouteWith (OrganizationsForums _ _) _                  -> act_save_forum
+      -- RouteWith (OrganizationsForumsBoards _ _) _            -> act_save_board
+      -- RouteWith (OrganizationsForumsBoardsThreads _ _) _     -> act_save_thread
+      -- RouteWith (OrganizationsForumsBoardsThreadPosts _ _) _ -> act_save_thread_post
       _ -> done
 
     where
@@ -734,5 +737,16 @@ runCore st core_result action         = runCoreM st $ do
         (Loaded (Just UserResponse{..}), Just request) -> do
           lr <- api $ postOrganization' (request { organizationRequestEmail = userResponseEmail })
           rehtie lr (const done) $ \OrganizationResponse{..} -> do
-            reroute (RouteWith (Organizations (ShowS organizationResponseName)) emptyParams)
+            reroute $ RouteWith (Organizations (ShowS organizationResponseName)) emptyParams
         _ ->  done
+
+    act_save_forum = do
+      Store{..} <- get
+      case (_l_m_organization, _m_forumRequest) of
+        (Loaded (Just OrganizationPackResponse{..}), Just request) -> do
+          lr <- case _l_m_forum of
+                  Loaded (Just ForumPackResponse{..}) -> api $ putForum' forumPackResponseForumId request
+                  _                                   -> api $ postForum_ByOrganizationId' organizationPackResponseOrganizationId request
+          rehtie lr (const done) $ \ForumResponse{..} -> do
+            reroute $ RouteWith (OrganizationsForums (organizationResponseName organizationPackResponseOrganization) (ShowS forumResponseName)) emptyParams
+        _ -> done
