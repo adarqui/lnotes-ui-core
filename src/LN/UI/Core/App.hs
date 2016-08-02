@@ -1,7 +1,7 @@
 {-# LANGUAGE ExplicitForAll   #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase       #-}
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RecordWildCards  #-}
 
 module LN.UI.Core.App (
   runCore
@@ -16,10 +16,10 @@ import           Data.Rehtie
 import           Haskell.Helpers.Either
 
 import           LN.Api
-import qualified LN.Api.String as ApiS
+import qualified LN.Api.String              as ApiS
 import           LN.Generate.Default
 import           LN.T
-import LN.T.Convert
+import           LN.T.Convert
 import           LN.UI.Core.Api
 import           LN.UI.Core.Control
 import           LN.UI.Core.Helpers.Map
@@ -27,7 +27,7 @@ import           LN.UI.Core.Loader
 import           LN.UI.Core.PageInfo
 import           LN.UI.Core.Router
 import           LN.UI.Core.State
-import LN.UI.Core.Types
+import           LN.UI.Core.Types
 
 
 
