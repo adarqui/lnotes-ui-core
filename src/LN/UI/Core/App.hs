@@ -609,7 +609,7 @@ runCore st core_result action         = runCoreM st $ do
       result <- fetch_organizations_forums_boards org_sid forum_sid board_sid
       doneDo result $ do
         Store{..} <- get
-        case _l_m_board of
+        case _l_threads of
           Loading   -> fetch_threads >>= \core_result_ -> basedOn_ core_result_ start next next
           Loaded _  -> done
           _         -> cantLoad_organizations_forums_boards_show
