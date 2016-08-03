@@ -412,8 +412,7 @@ runCore st core_result action         = runCoreM st $ do
 
     fetch_organization_show :: MonadIO m => OrganizationName -> CoreM m CoreResult
     fetch_organization_show org_sid = do
-      done
---      fetch_organizations_forums org_sid
+      fetch_organizations_forums_index org_sid
 
 
 
@@ -531,34 +530,36 @@ runCore st core_result action         = runCoreM st $ do
     fetch_organizations_forums_boards_new org_sid forum_sid = do
       Store{..} <- get
       case (_l_m_organization, _l_m_forum) of
-        (Loading, _)               -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next next
-        (Loaded (Just _), Loading) -> fetch_forum forum_sid >>= \core_result_ -> basedOn_ core_result_ start next done
-        _                          -> cantLoad_organizations_forums_boards_new
+        (Loading, Loading)                 -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded (Just _), Loading)         -> fetch_forum forum_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded (Just _), Loaded (Just _)) -> done
+        _                                  -> cantLoad_organizations_forums_boards_new
 
 
 
     load_organizations_forums_boards_index :: MonadIO m => CoreM m CoreResult
     load_organizations_forums_boards_index = do
-      load_organizations_forums_boards_new
+      load_organization
+      load_forum
       load_boards
       next
 
     cantLoad_organizations_forums_boards_index :: MonadIO m => CoreM m CoreResult
     cantLoad_organizations_forums_boards_index = do
-      cantLoad_organizations_forums_boards_new
+      cantLoad_organization
+      cantLoad_forum
       cantLoad_boards
       done
 
     fetch_organizations_forums_boards_index :: MonadIO m => OrganizationName -> ForumName -> CoreM m CoreResult
     fetch_organizations_forums_boards_index org_sid forum_sid = do
-      result <- fetch_organizations_forums_boards_new org_sid forum_sid
-      doneDo result $ do
-        Store{..} <- get
-        case _l_boards of
-          Loading   -> fetch_boards >>= \core_result_ -> basedOn_ core_result_ start next next
-          Loaded _  -> done
-          _         -> cantLoad_organizations_forums_boards_index
-          -- TODO ADD recent posts, messages of the week, etc
+      Store{..} <- get
+      case (_l_m_organization, _l_m_forum, _l_boards) of
+        (Loading, Loading, Loading)                  -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded (Just _), Loading, Loading)          -> fetch_forum forum_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded (Just _), Loaded (Just _), Loading)  -> fetch_boards >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded (Just _), Loaded (Just _), Loaded _) -> done
+        _                                            -> cantLoad_organizations_forums_boards_index
 
 
 
