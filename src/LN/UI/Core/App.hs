@@ -171,7 +171,7 @@ runCore st core_result action         = runCoreM st $ do
 
 
     load_forums_new :: MonadIO m => CoreM m CoreResult
-    load_forums_new = modify (\st'->st'{_m_forumRequest = Just defaultForumRequest}) *> next
+    load_forums_new = modify (\st'->st'{_l_m_forum = Loaded Nothing, _m_forumRequest = Just defaultForumRequest}) *> next
 
     cantLoad_forums_new :: MonadIO m => CoreM m CoreResult
     cantLoad_forums_new = modify (\st'->st'{_m_forumRequest = Nothing}) *> done
@@ -223,7 +223,7 @@ runCore st core_result action         = runCoreM st $ do
 
 
     load_boards_new :: MonadIO m => CoreM m CoreResult
-    load_boards_new = modify (\st'->st'{_m_boardRequest = Just defaultBoardRequest}) *> next
+    load_boards_new = modify (\st'->st'{_l_m_board = Loaded Nothing, _m_boardRequest = Just defaultBoardRequest}) *> next
 
     cantLoad_boards_new :: MonadIO m => CoreM m CoreResult
     cantLoad_boards_new = modify (\st'->st'{_m_boardRequest = Nothing}) *> done
@@ -276,7 +276,7 @@ runCore st core_result action         = runCoreM st $ do
 
 
     load_threads_new :: MonadIO m => CoreM m CoreResult
-    load_threads_new = modify (\st'->st'{_m_threadRequest = Just defaultThreadRequest}) *> next
+    load_threads_new = modify (\st'->st'{_l_m_thread = Loaded Nothing, _m_threadRequest = Just defaultThreadRequest}) *> next
 
     cantLoad_threads_new :: MonadIO m => CoreM m CoreResult
     cantLoad_threads_new = modify (\st'->st'{_m_threadRequest = Nothing}) *> done
@@ -329,7 +329,7 @@ runCore st core_result action         = runCoreM st $ do
 
 
     load_threadPosts_new :: MonadIO m => CoreM m CoreResult
-    load_threadPosts_new = modify (\st'->st'{_m_threadRequest = Just defaultThreadRequest}) *> next
+    load_threadPosts_new = modify (\st'->st'{_l_m_threadPost = Loaded Nothing, _m_threadRequest = Just defaultThreadRequest}) *> next
 
     cantLoad_threadPosts_new :: MonadIO m => CoreM m CoreResult
     cantLoad_threadPosts_new = modify (\st'->st'{_m_threadRequest = Nothing}) *> done
@@ -361,7 +361,7 @@ runCore st core_result action         = runCoreM st $ do
 
 
     load_organizations_new :: MonadIO m => CoreM m CoreResult
-    load_organizations_new = modify (\st'->st'{_m_organizationRequest = Just defaultOrganizationRequest}) *> next
+    load_organizations_new = modify (\st'->st'{_l_m_organization = Loaded Nothing, _m_organizationRequest = Just defaultOrganizationRequest}) *> next
 
 
 
