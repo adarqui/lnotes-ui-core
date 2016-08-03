@@ -19,6 +19,7 @@ library
                        LN.UI.Core.Access
                        LN.UI.Core.Api
                        LN.UI.Core.App
+                       LN.UI.Core.App.Board
                        LN.UI.Core.App.Forum
                        LN.UI.Core.App.Organization
                        LN.UI.Core.App.Tag
