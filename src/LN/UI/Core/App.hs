@@ -729,6 +729,69 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
+    load_organizations_forums_boards_threads_posts :: MonadIO m => CoreM m CoreResult
+    load_organizations_forums_boards_threads_posts = do
+      load_organization
+      load_forum
+      load_board
+      load_thread
+      load_threadPost
+      next
+
+    cantLoad_organizations_forums_boards_threads_posts :: MonadIO m => CoreM m CoreResult
+    cantLoad_organizations_forums_boards_threads_posts = do
+      cantLoad_organization
+      cantLoad_forum
+      cantLoad_board
+      cantLoad_thread
+      cantLoad_threadPost
+      done
+
+    fetch_organizations_forums_boards_threads_posts :: MonadIO m => OrganizationName -> ForumName -> BoardName -> ThreadName -> ThreadPostId -> CoreM m CoreResult
+    fetch_organizations_forums_boards_threads_posts org_sid forum_sid board_sid thread_sid post_id = do
+      Store{..} <- get
+      case (_l_m_organization, _l_m_forum, _l_m_board, _l_m_thread, _l_m_threadPost) of
+        (Loading, Loading, Loading, Loading, Loading)                                         -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded (Just _), Loading, Loading, Loading, Loading)                                 -> fetch_forum forum_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded (Just _), Loaded (Just _), Loading, Loading, Loading)                         -> fetch_board board_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded (Just _), Loaded (Just _), Loaded (Just _), Loading, Loading)                 -> fetch_thread thread_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded (Just _), Loaded (Just _), Loaded (Just _), Loaded (Just _), Loading)         -> fetch_threadPost post_id >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded (Just _), Loaded (Just _), Loaded (Just _), Loaded (Just _), Loaded (Just _)) -> done
+        _                                                                                     -> cantLoad_organizations_forums_boards_threads_posts
+
+
+
+    load_organizations_forums_boards_threads_posts_new :: MonadIO m => CoreM m CoreResult
+    load_organizations_forums_boards_threads_posts_new = do
+      load_organization
+      load_forum
+      load_board
+      load_thread
+      load_threadPosts_new
+      next
+
+    cantLoad_organizations_forums_boards_threads_posts_new :: MonadIO m => CoreM m CoreResult
+    cantLoad_organizations_forums_boards_threads_posts_new = do
+      cantLoad_organization
+      cantLoad_forum
+      cantLoad_board
+      cantLoad_thread
+      cantLoad_threadPosts_new
+      done
+
+    fetch_organizations_forums_boards_threads_posts_new :: MonadIO m => OrganizationName -> ForumName -> BoardName -> ThreadName -> CoreM m CoreResult
+    fetch_organizations_forums_boards_threads_posts_new org_sid forum_sid board_sid thread_sid = do
+      Store{..} <- get
+      case (_l_m_organization, _l_m_forum, _l_m_board, _l_m_thread) of
+        (Loading, Loading, Loading, Loading)                                 -> fetch_organization org_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded (Just _), Loading, Loading, Loading)                         -> fetch_forum forum_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded (Just _), Loaded (Just _), Loading, Loading)                 -> fetch_board board_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded (Just _), Loaded (Just _), Loaded (Just _), Loading)         -> fetch_thread thread_sid >>= \core_result_ -> basedOn_ core_result_ start next next
+        (Loaded (Just _), Loaded (Just _), Loaded (Just _), Loaded (Just _)) -> done
+        _                                                                    -> cantLoad_organizations_forums_boards_threads_posts_new
+
+
+
     load_organizations_forums_boards_threads_posts_index :: MonadIO m => CoreM m CoreResult
     load_organizations_forums_boards_threads_posts_index = do
       load_organization
