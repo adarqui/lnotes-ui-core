@@ -143,6 +143,21 @@ instance HasLinkName Route where
     OrganizationsForums _ (ShowS forum_sid)   -> forum_sid
     OrganizationsForums _ (EditS forum_sid)   -> forum_sid
     OrganizationsForums _ (DeleteS forum_sid) -> forum_sid
+    OrganizationsForumsBoards _ _ Index               -> "Boards"
+    OrganizationsForumsBoards _ _ New                 -> "New"
+    OrganizationsForumsBoards _ _ (ShowS board_sid)   -> board_sid
+    OrganizationsForumsBoards _ _ (EditS board_sid)   -> board_sid
+    OrganizationsForumsBoards _ _ (DeleteS board_sid) -> board_sid
+    OrganizationsForumsBoardsThreads _ _ _ Index               -> "Threads"
+    OrganizationsForumsBoardsThreads _ _ _ New                 -> "New"
+    OrganizationsForumsBoardsThreads _ _ _ (ShowS thread_sid)   -> thread_sid
+    OrganizationsForumsBoardsThreads _ _ _ (EditS thread_sid)   -> thread_sid
+    OrganizationsForumsBoardsThreads _ _ _ (DeleteS thread_sid) -> thread_sid
+    OrganizationsForumsBoardsThreadsPosts _ _ _ _ Index              -> "Posts"
+    OrganizationsForumsBoardsThreadsPosts _ _ _ _ New                -> "New"
+    OrganizationsForumsBoardsThreadsPosts _ _ _ _ (ShowS post_sid)   -> post_sid
+    OrganizationsForumsBoardsThreadsPosts _ _ _ _ (EditS post_sid)   -> post_sid
+    OrganizationsForumsBoardsThreadsPosts _ _ _ _ (DeleteS post_sid) -> post_sid
     (Users Index)                   -> "Users"
     Users (ShowS user_sid)          -> user_sid
     Users (EditS user_sid)          -> user_sid
