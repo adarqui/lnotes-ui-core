@@ -7,6 +7,9 @@ module LN.UI.Core.App.Board (
     setDisplayName
   , setDescription
   , clearDescription
+  , setIsAnonymous
+  , setCanCreateSubBoards
+  , setCanCreateThreads
   , setTag
   , addTag
   , deleteTag
@@ -45,9 +48,21 @@ clearDescription request@BoardRequest{..} =
 
 
 
--- setVisibility :: BoardRequest -> Visibility -> Action
--- setVisibility request@BoardRequest{..} input =
---   ApplyState (\st->st{_m_boardRequest = Just $! request{boardRequestVisibility = input}})
+setIsAnonymous :: BoardRequest -> Bool -> Action
+setIsAnonymous request@BoardRequest{..} input =
+  ApplyState (\st->st{_m_boardRequest = Just $! request{boardRequestIsAnonymous = input }})
+
+
+
+setCanCreateSubBoards :: BoardRequest -> Bool -> Action
+setCanCreateSubBoards request@BoardRequest{..} input =
+  ApplyState (\st->st{_m_boardRequest = Just $! request{boardRequestCanCreateSubBoards = input }})
+
+
+
+setCanCreateThreads :: BoardRequest -> Bool -> Action
+setCanCreateThreads request@BoardRequest{..} input =
+  ApplyState (\st->st{_m_boardRequest = Just $! request{boardRequestCanCreateThreads = input }})
 
 
 
