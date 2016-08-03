@@ -108,7 +108,7 @@ runCore st core_result action         = runCoreM st $ do
     -- RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid (EditS thread_sid)) _   -> basedOn load_organizations_forums_boards_threads (fetch_organizations_forums_boards_threads org_sid forum_sid board_sid thread_sid)
     -- RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid (DeleteS thread_sid)) _ -> basedOn load_organizations_forums_boards_threads (fetch_organizations_forums_boards_threads org_sid forum_sid board_sid thread_sid)
 
-    RouteWith (Users Index) _              -> basedOn load_users_index fetch_users_index
+    RouteWith (Users Index) _              -> basedOn load_users fetch_users
     -- RouteWith (Users (ShowS user_sid)) _   -> start
     -- RouteWith (Users (EditS user_sid)) _   -> start
     -- RouteWith (Users (DeleteS user_sid)) _ -> start
@@ -126,19 +126,19 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
-    load_users_index :: MonadIO m => CoreM m CoreResult
-    load_users_index = modify (\st'->st'{_l_users = Loading}) *> next
+    load_users :: MonadIO m => CoreM m CoreResult
+    load_users = modify (\st'->st'{_l_users = Loading}) *> next
 
-    cantLoad_users_index :: MonadIO m => CoreM m CoreResult
-    cantLoad_users_index = modify (\st'->st'{_l_users = CantLoad}) *> done
+    cantLoad_users :: MonadIO m => CoreM m CoreResult
+    cantLoad_users = modify (\st'->st'{_l_users = CantLoad}) *> done
 
-    fetch_users_index :: MonadIO m => CoreM m CoreResult
-    fetch_users_index = do
+    fetch_users :: MonadIO m => CoreM m CoreResult
+    fetch_users = do
       lr <- runEitherT $ do
         count <- mustPassT $ api $ getUsersCount'
         users <- mustPassT $ api $ getUserSanitizedPacks params_list
         pure (count, users)
-      rehtie lr (const cantLoad_users_index) $ \(count, user_packs) -> do
+      rehtie lr (const cantLoad_users) $ \(count, user_packs) -> do
         modify (\st'->st'{
             _l_users = Loaded $ idmapFrom userSanitizedPackResponseUserId (userSanitizedPackResponses user_packs)
           , _pageInfo = new_page_info count
@@ -178,24 +178,24 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
-    load_forums_index :: MonadIO m => CoreM m CoreResult
-    load_forums_index = modify (\st'->st'{_l_forums = Loading}) *> next
+    load_forums :: MonadIO m => CoreM m CoreResult
+    load_forums = modify (\st'->st'{_l_forums = Loading}) *> next
 
-    cantLoad_forums_index :: MonadIO m => CoreM m CoreResult
-    cantLoad_forums_index = modify (\st'->st'{_l_forums = CantLoad}) *> done
+    cantLoad_forums :: MonadIO m => CoreM m CoreResult
+    cantLoad_forums = modify (\st'->st'{_l_forums = CantLoad}) *> done
 
-    fetch_forums_index :: MonadIO m => CoreM m CoreResult
-    fetch_forums_index = do
+    fetch_forums :: MonadIO m => CoreM m CoreResult
+    fetch_forums = do
       Store{..} <- get
       case _l_m_organization of
         Loaded (Just organization@OrganizationPackResponse{..}) -> do
           lr <- api $ getForumPacks_ByOrganizationId' organizationPackResponseOrganizationId
-          rehtie lr (const cantLoad_forums_index) $ \ForumPackResponses{..} -> do
+          rehtie lr (const cantLoad_forums) $ \ForumPackResponses{..} -> do
             modify (\st'->st'{
               _l_forums = Loaded $ idmapFrom forumPackResponseForumId forumPackResponses
             })
             done
-        _ -> cantLoad_forums_index
+        _ -> cantLoad_forums
 
 
 
@@ -357,6 +357,22 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
+    load_threadPost :: MonadIO m => CoreM m CoreResult
+    load_threadPost = modify (\st'->st'{_l_m_threadPost = Loading}) *> next
+
+    cantLoad_threadPost :: MonadIO m => CoreM m CoreResult
+    cantLoad_threadPost = modify (\st'->st'{_l_m_threadPost = CantLoad}) *> done
+
+    fetch_threadPost :: MonadIO m => ThreadPostId -> CoreM m CoreResult
+    fetch_threadPost post_id = do
+      Store{..} <- get
+      lr <- api $ getThreadPostPack' post_id
+      rehtie lr (const cantLoad_threadPost) $ \post_pack -> do
+        modify (\st'->st'{
+          _l_m_threadPost = Loaded $ Just post_pack
+        })
+        done
+
 
 
 
@@ -391,12 +407,13 @@ runCore st core_result action         = runCoreM st $ do
     load_organization_show :: MonadIO m => CoreM m CoreResult
     load_organization_show = do
       load_organization
-      load_forums_index
+      load_forums
       next
 
     fetch_organization_show :: MonadIO m => OrganizationName -> CoreM m CoreResult
     fetch_organization_show org_sid = do
-      fetch_organizations_forums_index org_sid
+      done
+--      fetch_organizations_forums org_sid
 
 
 
@@ -424,13 +441,13 @@ runCore st core_result action         = runCoreM st $ do
     load_organizations_forums_index :: MonadIO m => CoreM m CoreResult
     load_organizations_forums_index = do
       load_organization
-      load_forums_index
+      load_forums
       next
 
     cantLoad_organizations_forums_index :: MonadIO m => CoreM m CoreResult
     cantLoad_organizations_forums_index = do
       cantLoad_organization
-      cantLoad_forums_index
+      cantLoad_forums
       done
 
     fetch_organizations_forums_index :: MonadIO m => OrganizationName -> CoreM m CoreResult
@@ -439,7 +456,7 @@ runCore st core_result action         = runCoreM st $ do
       doneDo result $ do
         Store{..} <- get
         case _l_forums of
-          Loading  -> fetch_forums_index >>= \core_result_ -> basedOn_ core_result_ start next next
+          Loading  -> fetch_forums >>= \core_result_ -> basedOn_ core_result_ start next next
           Loaded _ -> done
           _        -> cantLoad_organizations_forums_index
 
