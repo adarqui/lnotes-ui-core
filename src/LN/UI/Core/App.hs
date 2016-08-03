@@ -567,12 +567,14 @@ runCore st core_result action         = runCoreM st $ do
     load_organizations_forums_boards = do
       load_organization
       load_forum
+      load_board
       next
 
     cantLoad_organizations_forums_boards :: MonadIO m => CoreM m CoreResult
     cantLoad_organizations_forums_boards = do
       cantLoad_organization
       cantLoad_forum
+      cantLoad_board
       done
 
     fetch_organizations_forums_boards :: MonadIO m => OrganizationName -> ForumName -> BoardName -> CoreM m CoreResult
@@ -589,14 +591,14 @@ runCore st core_result action         = runCoreM st $ do
 
     load_organizations_forums_boards_show :: MonadIO m => CoreM m CoreResult
     load_organizations_forums_boards_show = do
-      load_organization
-      load_forum
+      load_organizations_forums_boards
+      load_threads
       next
 
     cantLoad_organizations_forums_boards_show :: MonadIO m => CoreM m CoreResult
     cantLoad_organizations_forums_boards_show = do
-      cantLoad_organization
-      cantLoad_forum
+      cantLoad_organizations_forums_boards
+      cantLoad_threads
       done
 
     fetch_organizations_forums_boards_show :: MonadIO m => OrganizationName -> ForumName -> BoardName -> CoreM m CoreResult
