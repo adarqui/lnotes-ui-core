@@ -3,6 +3,9 @@
 {-# LANGUAGE LambdaCase       #-}
 {-# LANGUAGE RecordWildCards  #-}
 
+-- | MUST REDUCE THE SIZE OF THIS FILE TO ~500 LINES
+-- Too much redundant insanity.
+
 module LN.UI.Core.App (
   runCore
 ) where
@@ -880,4 +883,16 @@ runCore st core_result action         = runCoreM st $ do
                   _                                    -> api $ postThread_ByBoardId' boardPackResponseBoardId request
           rehtie lr (const done) $ \ThreadResponse{..} -> do
             reroute $ RouteWith (OrganizationsForumsBoardsThreads (organizationResponseName organizationPackResponseOrganization) (forumResponseName forumPackResponseForum) (boardResponseName boardPackResponseBoard) (ShowS threadResponseName)) emptyParams
+        _ -> done
+
+    act_save_threadPost :: MonadIO m => CoreM m CoreResult
+    act_save_threadPost = do
+      Store{..} <- get
+      case (_l_m_organization, _l_m_forum, _l_m_board, _l_m_thread, _m_threadPostRequest) of
+        (Loaded (Just OrganizationPackResponse{..}), Loaded (Just ForumPackResponse{..}), Loaded (Just BoardPackResponse{..}), Loaded (Just ThreadPackResponse{..}), Just request) -> do
+          lr <- case _l_m_threadPost of
+                  Loaded (Just ThreadPostPackResponse{..}) -> api $ putThreadPost' threadPostPackResponseThreadPostId request
+                  _                                        -> api $ postThreadPost_ByThreadId' threadPackResponseThreadId request
+          rehtie lr (const done) $ \ThreadPostResponse{..} -> do
+            reroute $ RouteWith (OrganizationsForumsBoardsThreadsPosts (organizationResponseName organizationPackResponseOrganization) (forumResponseName forumPackResponseForum) (boardResponseName boardPackResponseBoard) (threadResponseName threadPackResponseThread) (ShowI threadPostResponseId)) emptyParams
         _ -> done
