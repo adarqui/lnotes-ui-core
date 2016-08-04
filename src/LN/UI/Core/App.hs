@@ -107,9 +107,9 @@ runCore st core_result action         = runCoreM st $ do
 
     RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid New) _                  -> basedOn load_organizations_forums_boards_threads_new (fetch_organizations_forums_boards_threads_new org_sid forum_sid board_sid)
     RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid Index) _                -> basedOn load_organizations_forums_boards_threads_index (fetch_organizations_forums_boards_threads_index org_sid forum_sid board_sid)
-    -- RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid (ShowS thread_sid)) _   -> basedOn load_organizations_forums_boards_threads_show (fetch_organizations_forums_boards_show org_sid forum_sid board_sid thread_sid)
-    -- RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid (EditS thread_sid)) _   -> basedOn load_organizations_forums_boards_threads (fetch_organizations_forums_boards_threads org_sid forum_sid board_sid thread_sid)
-    -- RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid (DeleteS thread_sid)) _ -> basedOn load_organizations_forums_boards_threads (fetch_organizations_forums_boards_threads org_sid forum_sid board_sid thread_sid)
+    RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid (ShowS thread_sid)) _   -> basedOn load_organizations_forums_boards_threads_show (fetch_organizations_forums_boards_threads_show org_sid forum_sid board_sid thread_sid)
+    RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid (EditS thread_sid)) _   -> basedOn load_organizations_forums_boards_threads (fetch_organizations_forums_boards_threads org_sid forum_sid board_sid thread_sid)
+    RouteWith (OrganizationsForumsBoardsThreads org_sid forum_sid board_sid (DeleteS thread_sid)) _ -> basedOn load_organizations_forums_boards_threads (fetch_organizations_forums_boards_threads org_sid forum_sid board_sid thread_sid)
 
     RouteWith (Users Index) _              -> basedOn load_users fetch_users
     -- RouteWith (Users (ShowS user_sid)) _   -> start
@@ -569,7 +569,7 @@ runCore st core_result action         = runCoreM st $ do
         (Loaded (Just _), Loading, Loading)                 -> fetch_forum forum_sid >>= \core_result_ -> basedOn_ core_result_ start next next
         (Loaded (Just _), Loaded (Just _), Loading)         -> fetch_board board_sid >>= \core_result_ -> basedOn_ core_result_ start next next
         (Loaded (Just _), Loaded (Just _), Loaded (Just _)) -> done
-        _                                                   -> cantLoad_organizations_forums_boards_index
+        _                                                   -> cantLoad_organizations_forums_boards
 
 
 
