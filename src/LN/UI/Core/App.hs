@@ -755,7 +755,7 @@ runCore st core_result action         = runCoreM st $ do
       result <- fetch_organizations_forums_boards_threads org_sid forum_sid board_sid thread_sid
       doneDo result $ do
         Store{..} <- get
-        case _l_m_threadPost of
+        case _l_threadPosts of
           Loading   -> fetch_threadPosts >>= \core_result_ -> basedOn_ core_result_ start next next
           Loaded _  -> done
           _         -> cantLoad_organizations_forums_boards_threads_show
