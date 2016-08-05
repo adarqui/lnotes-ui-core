@@ -24,6 +24,7 @@ library
                        LN.UI.Core.App.Organization
                        LN.UI.Core.App.Tag
                        LN.UI.Core.App.Thread
+                       LN.UI.Core.App.ThreadPost
                        LN.UI.Core.Control
                        LN.UI.Core.Loader
                        LN.UI.Core.PageInfo
