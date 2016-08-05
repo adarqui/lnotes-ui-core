@@ -326,8 +326,9 @@ runCore st core_result action         = runCoreM st $ do
           rehtie lr (const cantLoad_thread) $ \thread_pack -> do
             let ThreadPackResponse{..} = thread_pack
             modify (\st'->st'{
-                _l_m_thread = Loaded $ Just thread_pack
-              , _m_threadRequest = Just $ threadResponseToThreadRequest Nothing threadPackResponseThread
+                _l_m_thread          = Loaded $ Just thread_pack
+              , _m_threadRequest     = Just $ threadResponseToThreadRequest Nothing threadPackResponseThread
+              , _m_threadPostRequest = Just defaultThreadPostRequest
             })
             done
         _ -> cantLoad_thread
