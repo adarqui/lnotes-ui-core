@@ -1,3 +1,4 @@
+{-# LANGUAGE ExplicitForAll  #-}
 {-# LANGUAGE RankNTypes      #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -23,12 +24,25 @@ module LN.UI.Core.Access (
   permissionsMatchUpdateHTML,
   permissionsMatchDeleteHTML,
   permissionsMatchExecuteHTML,
-  permissionsMatchHTML
+  permissionsMatchHTML,
+  ifte_Self,
+  ifte_NotSelf,
+  self,
+  notSelf,
+  ifte_OrgMember,
+  orgMember,
+  orgMemberHTML,
+  orgMemberHTML',
+  ifte_OrgOwner,
+  orgOwner,
+  orgOwnerHTML,
+  orgOwnerHTML'
 ) where
 
 
 
 import           LN.T
+import           LN.UI.Core.Types
 
 
 
@@ -159,3 +173,91 @@ permissionsMatchHTML
   -> m
 permissionsMatchHTML perm_to_match permissions is_match_handler isnt_match_handler =
   if perm_to_match `elem` permissions then is_match_handler else isnt_match_handler
+
+
+
+
+
+ifte_Self :: forall m. HasAccess m => UserId -> UserId -> m -> m -> m
+ifte_Self my_id questionable_id t e =
+  if my_id == questionable_id
+     then t
+     else e
+
+
+
+ifte_NotSelf :: forall m. HasAccess m => UserId -> UserId -> m -> m -> m
+ifte_NotSelf my_id questionable_id t e =
+  if my_id /= questionable_id
+     then t
+     else e
+
+
+
+self :: UserId -> UserId -> Bool
+self my_id questionable_id = my_id == questionable_id
+
+
+
+notSelf :: UserId -> UserId -> Bool
+notSelf my_id questionable_id = my_id /= questionable_id
+
+
+
+--
+-- Owner Helpers
+--
+
+ifte_OrgOwner :: forall m. HasAccess m => OrganizationPackResponse -> m -> m -> m
+ifte_OrgOwner pack t e =
+  if orgOwner pack
+     then t
+     else e
+
+
+
+orgOwner :: OrganizationPackResponse -> Bool
+orgOwner OrganizationPackResponse{..} = Team_Owners `elem` organizationPackResponseTeams
+
+
+
+orgOwnerHTML :: forall m. HasAccess m => OrganizationPackResponse -> m -> m -> m
+orgOwnerHTML pack owner_cb no_owner_cb =
+  if orgOwner pack
+    then owner_cb
+    else no_owner_cb
+
+
+
+orgOwnerHTML' :: forall m. HasAccess m => OrganizationPackResponse -> m -> m
+orgOwnerHTML' pack owner_cb = orgOwnerHTML pack owner_cb empty
+
+
+
+--
+-- Member helpers
+--
+
+ifte_OrgMember :: forall m. HasAccess m => OrganizationPackResponse -> m -> m -> m
+ifte_OrgMember pack t e =
+  if orgMember pack
+     then t
+     else e
+
+
+
+orgMember :: OrganizationPackResponse -> Bool
+orgMember OrganizationPackResponse{..} = Team_Members `elem` organizationPackResponseTeams
+
+
+
+orgMemberHTML :: forall m. HasAccess m => OrganizationPackResponse -> m -> m -> m
+orgMemberHTML pack member_cb no_member_cb =
+  if orgMember pack
+    then member_cb
+    else no_member_cb
+
+
+
+orgMemberHTML' :: forall m. HasAccess m => OrganizationPackResponse -> m -> m
+orgMemberHTML' pack member_cb = orgMemberHTML pack member_cb empty
