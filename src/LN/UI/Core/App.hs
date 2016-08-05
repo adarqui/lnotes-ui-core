@@ -215,8 +215,10 @@ runCore st core_result action         = runCoreM st $ do
         Loaded (Just organization@OrganizationPackResponse{..}) -> do
           lr <- api $ ApiS.getForumPack_ByOrganizationId' forum_sid organizationPackResponseOrganizationId
           rehtie lr (const cantLoad_forum) $ \forum_pack -> do
+            let ForumPackResponse{..} = forum_pack
             modify (\st'->st'{
-              _l_m_forum = Loaded $ Just forum_pack
+                _l_m_forum      = Loaded $ Just forum_pack
+              , _m_forumRequest = Just $ forumResponseToForumRequest Nothing forumPackResponseForum
             })
             done
         _ -> cantLoad_forum
@@ -267,8 +269,10 @@ runCore st core_result action         = runCoreM st $ do
         Loaded (Just forum@ForumPackResponse{..}) -> do
           lr <- api $ ApiS.getBoardPack_ByForumId' board_sid forumPackResponseForumId
           rehtie lr (const cantLoad_board) $ \board_pack -> do
+            let BoardPackResponse{..} = board_pack
             modify (\st'->st'{
-              _l_m_board = Loaded $ Just board_pack
+                _l_m_board      = Loaded $ Just board_pack
+              , _m_boardRequest = Just $ boardResponseToBoardRequest Nothing Nothing boardPackResponseBoard
             })
             done
         _ -> cantLoad_board
@@ -320,8 +324,10 @@ runCore st core_result action         = runCoreM st $ do
         Loaded (Just board@BoardPackResponse{..}) -> do
           lr <- api $ ApiS.getThreadPack_ByBoardId' thread_sid boardPackResponseBoardId
           rehtie lr (const cantLoad_thread) $ \thread_pack -> do
+            let ThreadPackResponse{..} = thread_pack
             modify (\st'->st'{
-              _l_m_thread = Loaded $ Just thread_pack
+                _l_m_thread = Loaded $ Just thread_pack
+              , _m_threadRequest = Just $ threadResponseToThreadRequest Nothing threadPackResponseThread
             })
             done
         _ -> cantLoad_thread
@@ -371,8 +377,10 @@ runCore st core_result action         = runCoreM st $ do
       Store{..} <- get
       lr <- api $ getThreadPostPack' post_id
       rehtie lr (const cantLoad_threadPost) $ \post_pack -> do
+        let ThreadPostPackResponse{..} = post_pack
         modify (\st'->st'{
-          _l_m_threadPost = Loaded $ Just post_pack
+           _l_m_threadPost = Loaded $ Just post_pack
+         , _m_threadPostRequest = Just $ threadPostResponseToThreadPostRequest Nothing Nothing threadPostPackResponseThreadPost
         })
         done
 
