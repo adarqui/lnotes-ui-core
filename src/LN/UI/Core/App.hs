@@ -50,6 +50,7 @@ runCore st core_result action         = runCoreM st $ do
     Init             -> basedOn load_init fetch_init
     Route route_with -> act_route route_with
     Save             -> act_save
+    SaveThreadPost   -> act_save_threadPost
 
     -- Operations that should only run on a frontend.
     _ -> done
@@ -926,14 +927,17 @@ runCore st core_result action         = runCoreM st $ do
             reroute $ RouteWith (OrganizationsForumsBoardsThreads (organizationResponseName organizationPackResponseOrganization) (forumResponseName forumPackResponseForum) (boardResponseName boardPackResponseBoard) (ShowS threadResponseName)) emptyParams
         _ -> done
 
-    act_save_threadPost :: MonadIO m => CoreM m CoreResult
-    act_save_threadPost = do
-      Store{..} <- get
-      case (_l_m_organization, _l_m_forum, _l_m_board, _l_m_thread, _m_threadPostRequest) of
-        (Loaded (Just OrganizationPackResponse{..}), Loaded (Just ForumPackResponse{..}), Loaded (Just BoardPackResponse{..}), Loaded (Just ThreadPackResponse{..}), Just request) -> do
-          lr <- case _l_m_threadPost of
-                  Loaded (Just ThreadPostPackResponse{..}) -> api $ putThreadPost' threadPostPackResponseThreadPostId request
-                  _                                        -> api $ postThreadPost_ByThreadId' threadPackResponseThreadId request
-          rehtie lr (const done) $ \ThreadPostResponse{..} -> do
-            reroute $ RouteWith (OrganizationsForumsBoardsThreadsPosts (organizationResponseName organizationPackResponseOrganization) (forumResponseName forumPackResponseForum) (boardResponseName boardPackResponseBoard) (threadResponseName threadPackResponseThread) (ShowI threadPostResponseId)) emptyParams
-        _ -> done
+  -- Needs to be separated out
+  -- because we can save thread posts from the Threads route
+  --
+  act_save_threadPost :: MonadIO m => CoreM m CoreResult
+  act_save_threadPost = do
+    Store{..} <- get
+    case (_l_m_organization, _l_m_forum, _l_m_board, _l_m_thread, _m_threadPostRequest) of
+      (Loaded (Just OrganizationPackResponse{..}), Loaded (Just ForumPackResponse{..}), Loaded (Just BoardPackResponse{..}), Loaded (Just ThreadPackResponse{..}), Just request) -> do
+        lr <- case _l_m_threadPost of
+                Loaded (Just ThreadPostPackResponse{..}) -> api $ putThreadPost' threadPostPackResponseThreadPostId request
+                _                                        -> api $ postThreadPost_ByThreadId' threadPackResponseThreadId request
+        rehtie lr (const done) $ \ThreadPostResponse{..} -> do
+          reroute $ RouteWith (OrganizationsForumsBoardsThreadsPosts (organizationResponseName organizationPackResponseOrganization) (forumResponseName forumPackResponseForum) (boardResponseName boardPackResponseBoard) (threadResponseName threadPackResponseThread) (ShowI threadPostResponseId)) emptyParams
+      _ -> done

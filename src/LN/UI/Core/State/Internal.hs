@@ -112,6 +112,13 @@ data Action
   | Save                                -- ^ A global "Save", which uses State & current route to
                                         -- figure out what we are saving.
 
+  | SaveThreadPost
+                                        -- ^ Save, but specific to thread posts. Since thread posts
+                                        -- can be saved from:
+                                        -- OrganizationsForumsBoardsThreads and
+                                        -- OrganizationsForumsBoardsThreadsPosts
+                                        -- It needs its' own type
+
   | ApplyState (Store -> Store)         -- ^ used only be ln-ui-* frontends. This is how they can set
                                         -- the Store state, using the same Action sum type
 
