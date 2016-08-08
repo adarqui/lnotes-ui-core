@@ -311,6 +311,9 @@ runCore st core_result action         = runCoreM st $ do
             modify (\st'->st'{
               _l_threads = Loaded $ idmapFrom threadPackResponseThreadId threadPackResponses
             })
+            -- | Merge users from threads
+            --
+            act_merge_users $ map threadPackResponseUser threadPackResponses
             done
         _ -> cantLoad_threads
 
@@ -367,6 +370,9 @@ runCore st core_result action         = runCoreM st $ do
             modify (\st'->st'{
               _l_threadPosts = Loaded $ idmapFrom threadPostPackResponseThreadPostId threadPostPackResponses
             })
+            -- | Merge users from thread posts
+            --
+            act_merge_users $ map threadPostPackResponseUser threadPostPackResponses
             done
         _ -> cantLoad_threadPosts
 
