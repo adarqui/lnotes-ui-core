@@ -39,6 +39,7 @@ import           Web.Routes
 
 import           LN.T
 import           LN.UI.Core.Helpers.DataList  (tailFriendly)
+import           LN.UI.Core.Helpers.DataText  (tshow)
 import           LN.UI.Core.Helpers.GHCJS     (JSString, textToJSString')
 import           LN.UI.Core.Helpers.WebRoutes (notCRUD, notCRUDstr1, str1)
 import           LN.UI.Core.Router.CRUD       (CRUD (..))
@@ -153,11 +154,11 @@ instance HasLinkName Route where
     OrganizationsForumsBoardsThreads _ _ _ (ShowS thread_sid)   -> thread_sid
     OrganizationsForumsBoardsThreads _ _ _ (EditS thread_sid)   -> thread_sid
     OrganizationsForumsBoardsThreads _ _ _ (DeleteS thread_sid) -> thread_sid
-    OrganizationsForumsBoardsThreadsPosts _ _ _ _ Index              -> "Posts"
-    OrganizationsForumsBoardsThreadsPosts _ _ _ _ New                -> "New"
-    OrganizationsForumsBoardsThreadsPosts _ _ _ _ (ShowS post_sid)   -> post_sid
-    OrganizationsForumsBoardsThreadsPosts _ _ _ _ (EditS post_sid)   -> post_sid
-    OrganizationsForumsBoardsThreadsPosts _ _ _ _ (DeleteS post_sid) -> post_sid
+    OrganizationsForumsBoardsThreadsPosts _ _ _ _ Index             -> "Posts"
+    OrganizationsForumsBoardsThreadsPosts _ _ _ _ New               -> "New"
+    OrganizationsForumsBoardsThreadsPosts _ _ _ _ (ShowI post_id)   -> tshow post_id
+    OrganizationsForumsBoardsThreadsPosts _ _ _ _ (EditI post_id)   -> tshow post_id
+    OrganizationsForumsBoardsThreadsPosts _ _ _ _ (DeleteI post_id) -> tshow post_id
     (Users Index)                   -> "Users"
     Users (ShowS user_sid)          -> user_sid
     Users (EditS user_sid)          -> user_sid

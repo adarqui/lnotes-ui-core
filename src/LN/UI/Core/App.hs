@@ -15,10 +15,10 @@ module LN.UI.Core.App (
 import           Control.Monad.IO.Class     ()
 import           Control.Monad.RWS.Strict
 import           Control.Monad.Trans.Either
+import           Data.List                  (nub)
+import qualified Data.Map                   as Map
 import           Data.Rehtie
 import           Haskell.Helpers.Either
-import qualified Data.Map as Map
-import Data.List (nub)
 
 import           LN.Api
 import qualified LN.Api.String              as ApiS
