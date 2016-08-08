@@ -17,6 +17,8 @@ import           Control.Monad.RWS.Strict
 import           Control.Monad.Trans.Either
 import           Data.Rehtie
 import           Haskell.Helpers.Either
+import qualified Data.Map as Map
+import Data.List (nub)
 
 import           LN.Api
 import qualified LN.Api.String              as ApiS
@@ -49,6 +51,8 @@ runCore st core_result action         = runCoreM st $ do
   case action of
     Init             -> basedOn load_init fetch_init
     Route route_with -> act_route route_with
+    MergeUsers users -> act_merge_users users
+    MergeUserIds ids -> act_merge_user_ids ids
     Save             -> act_save
     SaveThreadPost   -> act_save_threadPost
 
@@ -941,3 +945,32 @@ runCore st core_result action         = runCoreM st $ do
         rehtie lr (const done) $ \ThreadPostResponse{..} -> do
           reroute $ RouteWith (OrganizationsForumsBoardsThreadsPosts (organizationResponseName organizationPackResponseOrganization) (forumResponseName forumPackResponseForum) (boardResponseName boardPackResponseBoard) (threadResponseName threadPackResponseThread) (ShowI threadPostResponseId)) emptyParams
       _ -> done
+
+
+
+  -- | Takes a list of sanitized users, and pulls down any of them that
+  -- don't already exist in the current usersCache
+  --
+  act_merge_users users = act_merge_user_ids $ map userSanitizedResponseId users
+
+
+
+  -- | Takes a list of user ids, and pulls down any of them that
+  -- don't already exist in the current _usersCache
+  --
+  act_merge_user_ids user_ids = do
+    Store{..} <- get
+    let
+      user_ids_not_in_map =
+        filter (\user_id -> not $ Map.member user_id _usersCache)
+        $ nub user_ids
+
+    case user_ids_not_in_map of
+      [] -> done
+      xs -> do
+        lr <- api $ getUserSanitizedPacks_ByUsersIds' user_ids_not_in_map
+        rehtie lr (const done) $ \UserSanitizedPackResponses{..} -> do
+          let new_users_map = idmapFrom userSanitizedPackResponseUserId userSanitizedPackResponses
+          Store{..} <- get
+          modify (\st'->st'{_usersCache = Map.union new_users_map _usersCache})
+          done

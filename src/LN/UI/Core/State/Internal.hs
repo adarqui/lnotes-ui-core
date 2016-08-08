@@ -107,6 +107,9 @@ data Action
   | Init
   | Route RouteWith
 
+  | MergeUsers [UserSanitizedResponse]  -- ^ Merge users into usersCache, fetching if they don't exist
+  | MergeUserIds [UserId]               -- ^ Merge user id's into usersCache, fetching if they don't exist
+
   | MachNext Action                     -- ^ Used by an ln-ui-* frontend to obtain the next state
 
   | Save                                -- ^ A global "Save", which uses State & current route to
