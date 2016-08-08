@@ -359,7 +359,7 @@ runCore st core_result action         = runCoreM st $ do
     load_threadPosts_new = modify (\st'->st'{_l_m_threadPost = Loaded Nothing, _m_threadRequest = Just defaultThreadRequest}) *> next
 
     cantLoad_threadPosts_new :: MonadIO m => CoreM m CoreResult
-    cantLoad_threadPosts_new = modify (\st'->st'{_m_threadRequest = Nothing}) *> done
+    cantLoad_threadPosts_new = modify (\st'->st'{_m_threadPostRequest = Nothing}) *> done
 
 
 
