@@ -338,6 +338,9 @@ runCore st core_result action         = runCoreM st $ do
               , _m_threadRequest     = Just $ threadResponseToThreadRequest Nothing threadPackResponseThread
               , _m_threadPostRequest = Just defaultThreadPostRequest
             })
+            -- | Merge user from thread
+            --
+            act_merge_users [threadPackResponseUser]
             done
         _ -> cantLoad_thread
 
@@ -394,6 +397,9 @@ runCore st core_result action         = runCoreM st $ do
            _l_m_threadPost = Loaded $ Just post_pack
          , _m_threadPostRequest = Just $ threadPostResponseToThreadPostRequest Nothing Nothing threadPostPackResponseThreadPost
         })
+        -- | Merge user from thread post
+        --
+        act_merge_users [threadPostPackResponseUser]
         done
 
 
