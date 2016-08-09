@@ -316,10 +316,16 @@ runCore st core_result action         = runCoreM st $ do
             ForumPackResponse{..} = forum
             BoardPackResponse{..} = board
 
-          lr <- api $ getThreadPacks_ByBoardId' boardPackResponseBoardId
-          rehtie lr (const cantLoad_threads) $ \ThreadPackResponses{..} -> do
+          lr <- runEitherT $ do
+            count   <- mustPassT $ api $ getThreadsCount_ByBoardId' boardPackResponseBoardId
+            threads <- mustPassT $ api $ getThreadPacks_ByBoardId params_list boardPackResponseBoardId
+            pure (count, threads)
+
+          rehtie lr (const cantLoad_threads) $ \(count, threads) -> do
+            let ThreadPackResponses{..} = threads
             modify (\st'->st'{
               _l_threads = Loaded $ idmapFrom threadPackResponseThreadId threadPackResponses
+            , _pageInfo  = new_page_info count
             })
             -- | Merge users from threads
             --
