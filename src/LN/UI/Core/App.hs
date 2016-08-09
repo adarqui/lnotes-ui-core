@@ -310,8 +310,12 @@ runCore st core_result action         = runCoreM st $ do
     fetch_threads :: MonadIO m => CoreM m CoreResult
     fetch_threads = do
       Store{..} <- get
-      case _l_m_board of
-        Loaded (Just board@BoardPackResponse{..}) -> do
+      case (_l_m_forum, _l_m_board) of
+        (Loaded (Just forum), Loaded (Just board)) -> do
+          let
+            ForumPackResponse{..} = forum
+            BoardPackResponse{..} = board
+
           lr <- api $ getThreadPacks_ByBoardId' boardPackResponseBoardId
           rehtie lr (const cantLoad_threads) $ \ThreadPackResponses{..} -> do
             modify (\st'->st'{
@@ -690,6 +694,7 @@ runCore st core_result action         = runCoreM st $ do
       load_forum
       load_board
       load_thread
+      modify (\st'->st'{_l_m_threadPost = Loaded Nothing})
       next
 
     cantLoad_organizations_forums_boards_threads :: MonadIO m => CoreM m CoreResult
