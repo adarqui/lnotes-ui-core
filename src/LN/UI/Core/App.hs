@@ -24,6 +24,7 @@ import           LN.Api
 import qualified LN.Api.String              as ApiS
 import           LN.Generate.Default
 import           LN.T
+import LN.T.Param
 import           LN.T.Convert
 import           LN.UI.Core.Api
 import           LN.UI.Core.Control
@@ -400,6 +401,26 @@ runCore st core_result action         = runCoreM st $ do
             done
         _ -> cantLoad_threadPosts
 
+    fetch_threadPostsWith :: MonadIO m => ThreadPostId -> CoreM m CoreResult
+    fetch_threadPostsWith post_id = do
+      Store{..} <- get
+      case _l_m_thread of
+        Loaded (Just thread@ThreadPackResponse{..}) -> do
+          lr <- runEitherT $ do
+            count <- mustPassT $ api $ getThreadPostsCount_ByThreadId' threadPackResponseThreadId
+            posts <- mustPassT $ api $ getThreadPostPacks_ByThreadId (WithThreadPosts True : params_list) threadPackResponseThreadId
+            pure (count, posts)
+          rehtie lr (const cantLoad_threadPosts) $ \(count, posts) -> do
+            let ThreadPostPackResponses{..} = posts
+            modify (\st'->st'{
+              _l_threadPosts = Loaded $ idmapFrom threadPostPackResponseThreadPostId threadPostPackResponses
+            , _pageInfo = new_page_info count
+            })
+            -- | Merge users from thread posts
+            --
+            act_merge_users $ map threadPostPackResponseUser threadPostPackResponses
+            done
+        _ -> cantLoad_threadPosts
 
 
     load_threadPost :: MonadIO m => CoreM m CoreResult
@@ -903,21 +924,29 @@ runCore st core_result action         = runCoreM st $ do
 
     load_organizations_forums_boards_threads_posts_show :: MonadIO m => CoreM m CoreResult
     load_organizations_forums_boards_threads_posts_show = do
-      load_organizations_forums_boards_threads_posts
+      load_organizations_forums_boards_threads
       load_threadPosts
       next
 
     cantLoad_organizations_forums_boards_threads_posts_show :: MonadIO m => CoreM m CoreResult
     cantLoad_organizations_forums_boards_threads_posts_show = do
-      cantLoad_organizations_forums_boards_threads_posts
+      cantLoad_organizations_forums_boards_threads
       cantLoad_threadPosts
       done
 
     fetch_organizations_forums_boards_threads_posts_show :: MonadIO m => OrganizationName -> ForumName -> BoardName -> ThreadName -> ThreadPostId -> CoreM m CoreResult
     fetch_organizations_forums_boards_threads_posts_show org_sid forum_sid board_sid thread_sid post_id = do
-      result <- fetch_organizations_forums_boards_threads_posts org_sid forum_sid board_sid thread_sid post_id
+      result <- fetch_organizations_forums_boards_threads org_sid forum_sid board_sid thread_sid
       doneDo result $ do
-        done
+        Store{..} <- get
+        case _l_threadPosts of
+          Loading  -> fetch_threadPostsWith post_id >>= \core_result_ -> basedOn_ core_result_ start next next
+          Loaded _ -> done
+          _        -> cantLoad_organizations_forums_boards_threads_posts_show
+
+      -- result <- fetch_organizations_forums_boards_threads_posts org_sid forum_sid board_sid thread_sid post_id
+      -- doneDo result $ do
+      --   done
         -- TODO FIXME
         -- Store{..} <- get
         -- case _l_threadPosts of
