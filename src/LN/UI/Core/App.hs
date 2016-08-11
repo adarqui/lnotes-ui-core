@@ -384,10 +384,15 @@ runCore st core_result action         = runCoreM st $ do
       Store{..} <- get
       case _l_m_thread of
         Loaded (Just thread@ThreadPackResponse{..}) -> do
-          lr <- api $ getThreadPostPacks_ByThreadId' threadPackResponseThreadId
-          rehtie lr (const cantLoad_threadPosts) $ \ThreadPostPackResponses{..} -> do
+          lr <- runEitherT $ do
+            count <- mustPassT $ api $ getThreadPostsCount_ByThreadId' threadPackResponseThreadId
+            posts <- mustPassT $ api $ getThreadPostPacks_ByThreadId' threadPackResponseThreadId
+            pure (count, posts)
+          rehtie lr (const cantLoad_threadPosts) $ \(count, posts) -> do
+            let ThreadPostPackResponses{..} = posts
             modify (\st'->st'{
               _l_threadPosts = Loaded $ idmapFrom threadPostPackResponseThreadPostId threadPostPackResponses
+            , _pageInfo = new_page_info count
             })
             -- | Merge users from thread posts
             --
