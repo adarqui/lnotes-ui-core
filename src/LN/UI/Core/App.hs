@@ -386,7 +386,7 @@ runCore st core_result action         = runCoreM st $ do
         Loaded (Just thread@ThreadPackResponse{..}) -> do
           lr <- runEitherT $ do
             count <- mustPassT $ api $ getThreadPostsCount_ByThreadId' threadPackResponseThreadId
-            posts <- mustPassT $ api $ getThreadPostPacks_ByThreadId' threadPackResponseThreadId
+            posts <- mustPassT $ api $ getThreadPostPacks_ByThreadId params_list threadPackResponseThreadId
             pure (count, posts)
           rehtie lr (const cantLoad_threadPosts) $ \(count, posts) -> do
             let ThreadPostPackResponses{..} = posts
