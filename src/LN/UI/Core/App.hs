@@ -401,6 +401,8 @@ runCore st core_result action         = runCoreM st $ do
             done
         _ -> cantLoad_threadPosts
 
+
+
     fetch_threadPostsWith :: MonadIO m => ThreadPostId -> CoreM m CoreResult
     fetch_threadPostsWith post_id = do
       Store{..} <- get
@@ -408,10 +410,15 @@ runCore st core_result action         = runCoreM st $ do
         Loaded (Just thread@ThreadPackResponse{..}) -> do
           lr <- runEitherT $ do
             count <- mustPassT $ api $ getThreadPostsCount_ByThreadId' threadPackResponseThreadId
-            posts <- mustPassT $ api $ getThreadPostPacks_ByThreadId (WithThreadPosts True : params_list) threadPackResponseThreadId
-            pure (count, posts)
-          rehtie lr (const cantLoad_threadPosts) $ \(count, posts) -> do
-            let ThreadPostPackResponses{..} = posts
+            post  <- mustPassT $ api $ getThreadPostPack (WithThreadPosts True : params_list) post_id
+            let ThreadPostPackResponse{..} = post
+            posts <- (case threadPostPackResponseWithThreadPosts of
+              Nothing   -> pure $ ThreadPostPackResponses []
+              Just keys -> mustPassT $ api $ getThreadPostPacks_ByThreadPostsIds' (post_id : keys))
+            pure (count, post, posts)
+          rehtie lr (const cantLoad_threadPosts) $ \(count, post, posts) -> do
+            let
+              ThreadPostPackResponses{..} = posts
             modify (\st'->st'{
               _l_threadPosts = Loaded $ idmapFrom threadPostPackResponseThreadPostId threadPostPackResponses
             , _pageInfo = new_page_info count
