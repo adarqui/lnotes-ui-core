@@ -103,6 +103,10 @@ runPageInfo CountResponses{..} page_info =
     (CountResponse{..}:[]) ->
       page_info {
         totalResults = countResponseN,
-        totalPages   = (countResponseN `div` resultsPerPage page_info)
+        totalPages   =
+          let
+            div_pages = countResponseN `div` resultsPerPage page_info
+            rem_pages = countResponseN `rem` resultsPerPage page_info
+          in div_pages + (if rem_pages > 0 then 1 else 0)
       }
     _      -> page_info
