@@ -1,5 +1,5 @@
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ExplicitForAll #-}
+{-# LANGUAGE RankNTypes     #-}
 
 module LN.UI.Core.Api (
   api
@@ -7,10 +7,10 @@ module LN.UI.Core.Api (
 
 
 
-import Control.Monad.Trans
 import           Control.Monad.IO.Class     (MonadIO)
+import           Control.Monad.Trans
+import           Control.Monad.Trans.Reader (ReaderT)
 import           Control.Monad.Trans.RWS
-import Control.Monad.Trans.Reader (ReaderT)
 import           Haskell.Api.Helpers
 import           Haskell.Api.Helpers.Shared
 

@@ -135,6 +135,8 @@ runCore st core_result action         = runCoreM st $ do
     params              = case route_with of RouteWith _ params' -> params'
     page_info           = pageInfoFromParams params
     params_list         = paramsFromPageInfo page_info
+    params_list_dsc     = paramsFromPageInfo (page_info { sortOrder = SortOrderBy_Dsc, order = OrderBy_ActivityAt })
+
     new_page_info count = runPageInfo count page_info
 
 
@@ -319,7 +321,7 @@ runCore st core_result action         = runCoreM st $ do
 
           lr <- runEitherT $ do
             count   <- mustPassT $ api $ getThreadsCount_ByBoardId' boardPackResponseBoardId
-            threads <- mustPassT $ api $ getThreadPacks_ByBoardId params_list boardPackResponseBoardId
+            threads <- mustPassT $ api $ getThreadPacks_ByBoardId params_list_dsc boardPackResponseBoardId
             pure (count, threads)
 
           rehtie lr (const cantLoad_threads) $ \(count, threads) -> do

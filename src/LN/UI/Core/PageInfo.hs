@@ -90,7 +90,7 @@ pageInfoFromParams params =
 
 paramsFromPageInfo :: PageInfo -> [Param]
 paramsFromPageInfo PageInfo{..} =
-  [ Offset currentPage
+  [ Offset (currentPage - 1)         -- ^ we're either page 1 or 1+n .. offsets start at 0
   , Limit resultsPerPage
   , SortOrder sortOrder, Order order
   ]
