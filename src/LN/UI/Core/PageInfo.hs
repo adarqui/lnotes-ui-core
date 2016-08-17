@@ -94,7 +94,7 @@ pageInfoFromParams params =
   m_order          = Map.lookup ParamTag_Order params
 
   current_page     = 0
-  current_offset   = maybe defaultCurrentPage (\(Offset offset) -> offset) m_offset
+  current_offset   = maybe defaultCurrentOffset (\(Offset offset) -> offset) m_offset
   results_per_page = maybe defaultResultsPerPage (\(Limit limit) -> limit) m_limit
   total_results    = 0
   total_pages      = 1
@@ -105,7 +105,7 @@ pageInfoFromParams params =
 
 paramsFromPageInfo :: PageInfo -> [Param]
 paramsFromPageInfo PageInfo{..} =
-  [ Offset currentOffset             -- ^ we're either page 1 or 1+n .. offsets start at 0
+  [ Offset currentOffset
   , Limit resultsPerPage
   , SortOrder sortOrder, Order order
   ]
