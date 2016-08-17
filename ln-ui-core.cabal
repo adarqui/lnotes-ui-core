@@ -81,6 +81,7 @@ test-suite ln-ui-test
   hs-source-dirs:      test
   main-is:             Spec.hs
   other-modules:       LN.UI.Core.PageNumbersSpec
+                     , LN.UI.Core.PageInfoSpec
                      , LN.UI.Core.Router.RouteSpec
                      , LN.UI.Core.Router.CRUDSpec
   build-depends:       base
