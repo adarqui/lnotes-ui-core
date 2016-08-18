@@ -22,6 +22,7 @@ library
                        LN.UI.Core.App.Board
                        LN.UI.Core.App.Forum
                        LN.UI.Core.App.Organization
+                       LN.UI.Core.App.Profile
                        LN.UI.Core.App.Tag
                        LN.UI.Core.App.Thread
                        LN.UI.Core.App.ThreadPost

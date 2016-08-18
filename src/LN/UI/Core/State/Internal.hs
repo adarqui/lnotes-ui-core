@@ -56,6 +56,8 @@ data Store = Store {
       , _l_m_threadPost           :: !(Loader (Maybe ThreadPostPackResponse))
       , _m_threadPostRequest      :: !(Maybe ThreadPostRequest)
       , _l_recentThreadPosts      :: !(Loader (Map ThreadPostId ThreadPostPackResponse))
+      , _l_m_profile              :: !(Loader (Maybe ProfileResponse))
+      , _m_profileRequest         :: !(Maybe ProfileRequest)
     } deriving (Typeable, Generic, NFData)
 
 
@@ -85,6 +87,8 @@ defaultStore = Store {
       , _l_m_threadPost           = Loaded Nothing
       , _m_threadPostRequest      = Nothing
       , _l_recentThreadPosts      = Loaded Map.empty
+      , _l_m_profile              = Loaded Nothing
+      , _m_profileRequest         = Nothing
     }
 
 
