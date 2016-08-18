@@ -32,9 +32,11 @@ data CRUD
   | ShowS Text
   | ShowI Int64
   | ShowB Bool
+  | ShowZ
   | New
   | EditS Text
   | EditI Int64
+  | EditZ
   | DeleteS Text
   | DeleteI Int64
   | DeleteZ
@@ -52,6 +54,7 @@ instance PathInfo CRUD where
       ShowB b   -> [bool2Text b]
       EditS s   -> ["_edit", s]
       EditI i   -> ["_edit", Text.pack $ show i]
+      EditZ     -> ["_edit"]
       DeleteS s -> ["_delete", s]
       DeleteI i -> ["_delete", Text.pack $ show i]
       DeleteZ   -> ["_delete"]
@@ -61,7 +64,7 @@ instance PathInfo CRUD where
     -- TODO FIXME: This is hideous.
     <|> (do
             segment "_edit"
-            (EditI <$> fromPathSegments) <|> (EditS <$> str1))
+            (EditI <$> fromPathSegments) <|> (EditS <$> str1) <|> (pure EditZ))
     -- TODO FIXME: This is hideous.
     <|> (do
             segment "_delete"

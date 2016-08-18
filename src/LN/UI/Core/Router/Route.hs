@@ -108,7 +108,7 @@ data Route
   | OrganizationsMembersOnly Text
   | OrganizationsMembership Text CRUD
   | Users CRUD
-  | UsersProfile Text
+  | UsersProfile Text CRUD
   | UsersSettings Text
   | UsersPMs Text
   | UsersThreads Text
@@ -159,10 +159,12 @@ instance HasLinkName Route where
     OrganizationsForumsBoardsThreadsPosts _ _ _ _ (ShowI post_id)   -> tshow post_id
     OrganizationsForumsBoardsThreadsPosts _ _ _ _ (EditI post_id)   -> tshow post_id
     OrganizationsForumsBoardsThreadsPosts _ _ _ _ (DeleteI post_id) -> tshow post_id
-    (Users Index)                   -> "Users"
+    Users Index                     -> "Users"
     Users (ShowS user_sid)          -> user_sid
     Users (EditS user_sid)          -> user_sid
     Users (DeleteS user_sid)        -> user_sid
+    UsersProfile _ Index            -> "Profile"
+    UsersProfile _ EditZ            -> "Edit Profile"
     Login                           -> "Login"
     Logout                          -> "Logout"
     _                               -> "Unknown"
@@ -215,9 +217,10 @@ instance PathInfo Route where
     OrganizationsForumsBoardsThreads org_sid forum_sid board_sid crud -> (pure org_sid) <> pure "f" <> pure forum_sid <> pure board_sid <> toPathSegments crud
     OrganizationsForumsBoardsThreadsPosts org_sid forum_sid board_sid thread_sid Index -> (pure org_sid) <> pure "f" <> pure forum_sid <> pure board_sid <> pure thread_sid
     OrganizationsForumsBoardsThreadsPosts org_sid forum_sid board_sid thread_sid crud -> (pure org_sid) <> pure "f" <> pure forum_sid <> pure board_sid <> pure thread_sid <> toPathSegments crud
-    Users Index              -> pure "users"
-    Users crud               -> (pure $ "users") <> toPathSegments crud
-    _                        -> pure ""
+    Users Index                -> pure "users"
+    Users crud                 -> (pure "users") <> toPathSegments crud
+    UsersProfile user_sid crud -> (pure "users") <> (pure user_sid) <> toPathSegments crud
+    _                          -> pure ""
 
   fromPathSegments =
         (About         <$ segment "about"
