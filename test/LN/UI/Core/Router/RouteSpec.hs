@@ -74,6 +74,10 @@ spec = do
       fromPathInfo "/ln/f/community/board_parent/thread" `shouldBe` (Right $ OrganizationsForumsBoardsThreads "ln" "community" "board_parent" (ShowS "thread"))
       fromPathInfo "/ln/f/community/board_parent/thread/_new" `shouldBe` (Right $ OrganizationsForumsBoardsThreadsPosts "ln" "community" "board_parent" "thread" New)
       fromPathInfo "/ln/f/community/board_parent/thread/1" `shouldBe` (Right $ OrganizationsForumsBoardsThreadsPosts "ln" "community" "board_parent" "thread" (ShowI 1))
+      fromPathInfo "/users"                       `shouldBe` (Right $ Users Index)
+      fromPathInfo "/users/adarqui"               `shouldBe` (Right $ Users (ShowS "adarqui"))
+      fromPathInfo "/users/adarqui/profile"       `shouldBe` (Right $ UsersProfile "adarqui" Index)
+      fromPathInfo "/users/adarqui/profile/_edit" `shouldBe` (Right $ UsersProfile "adarqui" EditZ)
 
 
   describe "route with tests" $ do
