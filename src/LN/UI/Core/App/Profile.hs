@@ -9,7 +9,9 @@ module LN.UI.Core.App.Profile (
   , setWebsites
   , clearWebsites
   , setLocation
+  , clearLocation
   , setSignature
+  , clearSignature
   , setDebug
 ) where
 

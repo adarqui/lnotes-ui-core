@@ -45,6 +45,10 @@ spec = do
       toPathInfo (OrganizationsForumsBoards "ln" "community" (ShowS "board_parent")) `shouldBe` "/ln/f/community/board_parent"
       toPathInfo (OrganizationsForumsBoardsThreads "ln" "community" "board_parent" (ShowS "thread")) `shouldBe` "/ln/f/community/board_parent/thread"
       toPathInfo (OrganizationsForumsBoardsThreadsPosts "ln" "community" "board_parent" "thread" (ShowI 1)) `shouldBe` "/ln/f/community/board_parent/thread/1"
+      toPathInfo (Users Index)                  `shouldBe` "/users"
+      toPathInfo (Users (ShowS "adarqui"))      `shouldBe` "/users/adarqui"
+      toPathInfo (UsersProfile "adarqui" Index) `shouldBe` "/users/adarqui/profile"
+      toPathInfo (UsersProfile "adarqui" EditZ) `shouldBe` "/users/adarqui/profile/_edit"
 
     it "fromPathInfo should work" $ do
       fromPathInfo "/"                         `shouldBe` (Right Home)

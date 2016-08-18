@@ -219,7 +219,8 @@ instance PathInfo Route where
     OrganizationsForumsBoardsThreadsPosts org_sid forum_sid board_sid thread_sid crud -> (pure org_sid) <> pure "f" <> pure forum_sid <> pure board_sid <> pure thread_sid <> toPathSegments crud
     Users Index                -> pure "users"
     Users crud                 -> (pure "users") <> toPathSegments crud
-    UsersProfile user_sid crud -> (pure "users") <> (pure user_sid) <> toPathSegments crud
+    UsersProfile user_sid Index -> (pure "users") <> (pure user_sid) <> (pure "profile")
+    UsersProfile user_sid crud  -> (pure "users") <> (pure user_sid) <> (pure "profile") <> toPathSegments crud
     _                          -> pure ""
 
   fromPathSegments =
@@ -228,6 +229,7 @@ instance PathInfo Route where
     <|> Errors        <$ segment "errors"
     <|> Portal        <$ segment "portal"
     <|> Users         <$ segment "users" <*> fromPathSegments
+    <|> UsersProfile  <$ segment "users" <*> fromPathSegments <*> (segment "profile" *> fromPathSegments)
     <|> Organizations <$ segment "organizations" <*> fromPathSegments
 
     -- welcome to the inferno
