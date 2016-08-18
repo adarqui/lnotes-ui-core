@@ -123,7 +123,10 @@ runCore st core_result action         = runCoreM st $ do
     RouteWith (OrganizationsForumsBoardsThreadsPosts org_sid forum_sid board_sid thread_sid (EditI post_id)) _   -> basedOn load_organizations_forums_boards_threads_posts (fetch_organizations_forums_boards_threads_posts org_sid forum_sid board_sid thread_sid post_id)
     RouteWith (OrganizationsForumsBoardsThreadsPosts org_sid forum_sid board_sid thread_sid (DeleteI post_id)) _ -> basedOn load_organizations_forums_boards_threads_posts (fetch_organizations_forums_boards_threads_posts org_sid forum_sid board_sid thread_sid post_id)
 
-    RouteWith (Users Index) _              -> basedOn load_users fetch_users
+    RouteWith (Users Index) _                 -> basedOn load_users fetch_users
+    RouteWith (Users (ShowS user_sid)) _      -> basedOn load_user (fetch_user user_sid)
+    RouteWith (UsersProfile user_sid Index) _ -> basedOn load_user (fetch_user user_sid)
+
     -- RouteWith (Users (ShowS user_sid)) _   -> start
     -- RouteWith (Users (EditS user_sid)) _   -> start
     -- RouteWith (Users (DeleteS user_sid)) _ -> start
@@ -161,6 +164,28 @@ runCore st core_result action         = runCoreM st $ do
           , _pageInfo = new_page_info count
           })
         done
+
+
+
+    load_user :: MonadIO m => CoreM m CoreResult
+    load_user = modify (\st'->st'{_l_m_user = Loading}) *> next
+
+    cantLoad_user :: MonadIO m => CoreM m CoreResult
+    cantLoad_user = modify (\st'->st'{_l_m_user = CantLoad}) *> done
+
+    fetch_user :: MonadIO m => UserName -> CoreM m CoreResult
+    fetch_user user_sid = do
+      lr <- api $ ApiS.getUserSanitizedPack' user_sid
+      rehtie lr (const cantLoad_user) $ \user@UserSanitizedPackResponse{..} -> do
+        modify (\st'->st'{
+            _l_m_user = Loaded $ Just user
+          -- , _m_userRequest =
+          --   Just $ userResponseToUserRequest
+          --            Nothing -- unused state
+          --            userPackResponseUser
+        })
+        done
+
 
 
 
@@ -962,6 +987,39 @@ runCore st core_result action         = runCoreM st $ do
         --   Loading   -> fetch_threadPosts >>= \core_result_ -> basedOn_ core_result_ start next next
         --   Loaded _  -> done
         --   _         -> cantLoad_organizations_forums_boards_threads_posts_show
+
+
+
+
+
+    -- load_users_profile :: MonadIO m => CoreM m CoreResult
+    -- load_users_profile = modify (\st'->st'{_l_m_profile = Loading}) *> next
+
+    -- cantLoad_users_profile :: MonadIO m => CoreM m CoreResult
+    -- cantLoad_users_profile = modify (\st'->st'{_l_m_profile = CantLoad}) *> done
+
+    -- fetch_users_profile :: MonadIO m => UserName -> CoreM m CoreResult
+    -- fetch_users_profile user_sid = do
+    --   lr <- runEitherT $ do
+    --     pure (count, profiles)
+    --   rehtie lr (const $ cantLoad_users_profile) $ \(count, profile_packs) -> do
+    --     modify (\st'->st'{
+    --         _l_m_profile = Loaded $ idmapFrom profilePackResponseOrganizationId (profilePackResponses profile_packs)
+    --       , _pageInfo = new_page_info count
+    --       })
+    --     done
+
+
+
+    -- load_users_profile_index :: MonadIO m => CoreM m CoreResult
+    -- load_users_profile_index = do
+    --   load_user
+    --   next
+
+    -- fetch_users_profile_index :: MonadIO m => UserName -> CoreM m CoreResult
+    -- fetch_users_profile_index user_sid = do
+
+
 
 
 

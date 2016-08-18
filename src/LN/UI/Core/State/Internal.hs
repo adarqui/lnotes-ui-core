@@ -46,7 +46,7 @@ data Store = Store {
       , _l_threadPosts            :: !(Loader (Map ThreadId ThreadPostPackResponse))
       , _l_m_organization         :: !(Loader (Maybe OrganizationPackResponse))
       , _m_organizationRequest    :: !(Maybe OrganizationRequest)
-      , _l_m_user                 :: !(Loader (Maybe UserPackResponse))
+      , _l_m_user                 :: !(Loader (Maybe UserSanitizedPackResponse))
       , _l_m_forum                :: !(Loader (Maybe ForumPackResponse))
       , _m_forumRequest           :: !(Maybe ForumRequest)
       , _l_m_board                :: !(Loader (Maybe BoardPackResponse))
@@ -56,7 +56,6 @@ data Store = Store {
       , _l_m_threadPost           :: !(Loader (Maybe ThreadPostPackResponse))
       , _m_threadPostRequest      :: !(Maybe ThreadPostRequest)
       , _l_recentThreadPosts      :: !(Loader (Map ThreadPostId ThreadPostPackResponse))
-      , _l_m_profile              :: !(Loader (Maybe ProfileResponse))
       , _m_profileRequest         :: !(Maybe ProfileRequest)
     } deriving (Typeable, Generic, NFData)
 
@@ -87,7 +86,6 @@ defaultStore = Store {
       , _l_m_threadPost           = Loaded Nothing
       , _m_threadPostRequest      = Nothing
       , _l_recentThreadPosts      = Loaded Map.empty
-      , _l_m_profile              = Loaded Nothing
       , _m_profileRequest         = Nothing
     }
 
