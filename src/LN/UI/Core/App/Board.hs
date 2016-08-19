@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns     #-}
 {-# LANGUAGE ExplicitForAll   #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase       #-}
@@ -31,55 +32,55 @@ import           LN.UI.Core.State
 
 
 setDisplayName :: BoardRequest -> Text -> Action
-setDisplayName request@BoardRequest{..} input =
-  ApplyState (\st->st{_m_boardRequest = Just $! request{boardRequestDisplayName = input}})
+setDisplayName !request@BoardRequest{..} !input =
+  ApplyState (\st->st{_m_boardRequest = Just $ request{boardRequestDisplayName = input}})
 
 
 
 setDescription :: BoardRequest -> Text -> Action
-setDescription request@BoardRequest{..} input =
-  ApplyState (\st->st{_m_boardRequest = Just $! request{boardRequestDescription = Just $! input}})
+setDescription !request@BoardRequest{..} !input =
+  ApplyState (\st->st{_m_boardRequest = Just $ request{boardRequestDescription = Just input}})
 
 
 
 clearDescription :: BoardRequest -> Action
-clearDescription request@BoardRequest{..} =
-  ApplyState (\st->st{_m_boardRequest = Just $! request{boardRequestDescription = Nothing }})
+clearDescription !request@BoardRequest{..} =
+  ApplyState (\st->st{_m_boardRequest = Just $ request{boardRequestDescription = Nothing }})
 
 
 
 setIsAnonymous :: BoardRequest -> Bool -> Action
-setIsAnonymous request@BoardRequest{..} input =
-  ApplyState (\st->st{_m_boardRequest = Just $! request{boardRequestIsAnonymous = input }})
+setIsAnonymous !request@BoardRequest{..} !input =
+  ApplyState (\st->st{_m_boardRequest = Just $ request{boardRequestIsAnonymous = input }})
 
 
 
 setCanCreateSubBoards :: BoardRequest -> Bool -> Action
-setCanCreateSubBoards request@BoardRequest{..} input =
-  ApplyState (\st->st{_m_boardRequest = Just $! request{boardRequestCanCreateSubBoards = input }})
+setCanCreateSubBoards !request@BoardRequest{..} !input =
+  ApplyState (\st->st{_m_boardRequest = Just $ request{boardRequestCanCreateSubBoards = input }})
 
 
 
 setCanCreateThreads :: BoardRequest -> Bool -> Action
-setCanCreateThreads request@BoardRequest{..} input =
-  ApplyState (\st->st{_m_boardRequest = Just $! request{boardRequestCanCreateThreads = input }})
+setCanCreateThreads !request@BoardRequest{..} !input =
+  ApplyState (\st->st{_m_boardRequest = Just $ request{boardRequestCanCreateThreads = input }})
 
 
 
 setTag :: BoardRequest -> Text -> Action
-setTag request@BoardRequest{..} input =
+setTag !request@BoardRequest{..} !input =
    ApplyState (\st->
      st{
-       _m_boardRequest = Just $! request{boardRequestStateTag = Just input}
+       _m_boardRequest = Just $ request{boardRequestStateTag = Just input}
      })
 
 
 
 addTag :: BoardRequest -> Action
-addTag request@BoardRequest{..} =
+addTag !request@BoardRequest{..} =
   ApplyState (\st->
     st{
-      _m_boardRequest = Just $! request{boardRequestTags = tags, boardRequestStateTag = Nothing}
+      _m_boardRequest = Just $ request{boardRequestTags = tags, boardRequestStateTag = Nothing}
     })
   where
   (tags, _) = Tag.addTag boardRequestTags boardRequestStateTag
@@ -87,10 +88,10 @@ addTag request@BoardRequest{..} =
 
 
 deleteTag :: BoardRequest -> Int -> Action
-deleteTag request@BoardRequest{..} idx =
+deleteTag !request@BoardRequest{..} !idx =
   ApplyState (\st->
     st{
-      _m_boardRequest = Just $! request{boardRequestTags = tags}
+      _m_boardRequest = Just $ request{boardRequestTags = tags}
     })
   where
   tags = Tag.deleteTag boardRequestTags idx
@@ -98,25 +99,25 @@ deleteTag request@BoardRequest{..} idx =
 
 
 clearTags :: BoardRequest -> Action
-clearTags request@BoardRequest{..} =
-  ApplyState (\st->st{_m_boardRequest = Just $! request{boardRequestTags = []}})
+clearTags !request@BoardRequest{..} =
+  ApplyState (\st->st{_m_boardRequest = Just $ request{boardRequestTags = []}})
 
 
 
 setSuggestedTag :: BoardRequest -> Text -> Action
-setSuggestedTag request@BoardRequest{..} input =
+setSuggestedTag !request@BoardRequest{..} !input =
    ApplyState (\st->
      st{
-       _m_boardRequest = Just $! request{boardRequestStateSuggestedTag = Just input}
+       _m_boardRequest = Just $ request{boardRequestStateSuggestedTag = Just input}
      })
 
 
 
 addSuggestedTag :: BoardRequest -> Action
-addSuggestedTag request@BoardRequest{..} =
+addSuggestedTag !request@BoardRequest{..} =
   ApplyState (\st->
     st{
-      _m_boardRequest = Just $! request{boardRequestSuggestedTags = tags, boardRequestStateSuggestedTag = Nothing}
+      _m_boardRequest = Just $ request{boardRequestSuggestedTags = tags, boardRequestStateSuggestedTag = Nothing}
     })
   where
   (tags, _) = Tag.addTag boardRequestSuggestedTags boardRequestStateSuggestedTag
@@ -124,10 +125,10 @@ addSuggestedTag request@BoardRequest{..} =
 
 
 deleteSuggestedTag :: BoardRequest -> Int -> Action
-deleteSuggestedTag request@BoardRequest{..} idx =
+deleteSuggestedTag !request@BoardRequest{..} !idx =
   ApplyState (\st->
     st{
-      _m_boardRequest = Just $! request{boardRequestSuggestedTags = tags}
+      _m_boardRequest = Just $ request{boardRequestSuggestedTags = tags}
     })
   where
   tags = Tag.deleteTag boardRequestSuggestedTags idx
@@ -135,5 +136,5 @@ deleteSuggestedTag request@BoardRequest{..} idx =
 
 
 clearSuggestedTags :: BoardRequest -> Action
-clearSuggestedTags request@BoardRequest{..} =
-  ApplyState (\st->st{_m_boardRequest = Just $! request{boardRequestSuggestedTags = []}})
+clearSuggestedTags !request@BoardRequest{..} =
+  ApplyState (\st->st{_m_boardRequest = Just $ request{boardRequestSuggestedTags = []}})
