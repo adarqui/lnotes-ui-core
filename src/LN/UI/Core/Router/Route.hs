@@ -228,8 +228,10 @@ instance PathInfo Route where
     <|> Me            <$ segment "me"
     <|> Errors        <$ segment "errors"
     <|> Portal        <$ segment "portal"
-    <|> Users         <$ segment "users" <*> fromPathSegments
-    <|> UsersProfile  <$ segment "users" <*> fromPathSegments <*> (segment "profile" *> fromPathSegments)
+    <|> (try
+            (UsersProfile  <$ segment "users" <*> fromPathSegments <*> (segment "profile" *> fromPathSegments))
+            <|>
+            (Users         <$ segment "users" <*> fromPathSegments))
     <|> Organizations <$ segment "organizations" <*> fromPathSegments
 
     -- welcome to the inferno
