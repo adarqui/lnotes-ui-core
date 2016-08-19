@@ -78,7 +78,10 @@ runCore st core_result action         = runCoreM st $ do
     rehtie
       lr
       (const cantLoad_init)
-      $ \user_pack -> modify (\st_->st_{_l_m_me = Loaded $ Just user_pack}) *> done
+      $ \user_pack -> do
+        let UserResponse{..} = user_pack
+        modify (\st_->st_{_l_m_me = Loaded $ Just user_pack, _meId = userResponseId})
+        done
 
   load_init = modify (\st'->st'{_l_m_me = Loading}) *> next
 
@@ -125,7 +128,7 @@ runCore st core_result action         = runCoreM st $ do
 
     RouteWith (Users Index) _                 -> basedOn load_users fetch_users
     RouteWith (Users (ShowS user_sid)) _      -> basedOn load_user (fetch_user user_sid)
-    RouteWith (UsersProfile user_sid Index) _ -> basedOn load_user (fetch_user user_sid)
+    RouteWith (UsersProfile user_sid _) _     -> basedOn load_user (fetch_user user_sid)
 
     -- RouteWith (Users (ShowS user_sid)) _   -> start
     -- RouteWith (Users (EditS user_sid)) _   -> start
@@ -179,10 +182,7 @@ runCore st core_result action         = runCoreM st $ do
       rehtie lr (const cantLoad_user) $ \user@UserSanitizedPackResponse{..} -> do
         modify (\st'->st'{
             _l_m_user = Loaded $ Just user
-          -- , _m_userRequest =
-          --   Just $ userResponseToUserRequest
-          --            Nothing -- unused state
-          --            userPackResponseUser
+          , _m_profileRequest = Just $ profileResponseToProfileRequest [] Nothing userSanitizedPackResponseProfile
         })
         done
 
