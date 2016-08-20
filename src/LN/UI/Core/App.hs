@@ -50,12 +50,13 @@ runCore st core_result (ApplyState f) = pure (core_result, f st)
 runCore st _ (MachNext action)        = runCore st Next action
 runCore st core_result action         = runCoreM st $ do
   case action of
-    Init             -> basedOn load_init fetch_init
-    Route route_with -> act_route route_with
-    MergeUsers users -> act_merge_users users
-    MergeUserIds ids -> act_merge_user_ids ids
-    Save             -> act_save
-    SaveThreadPost   -> act_save_threadPost
+    Init                     -> basedOn load_init fetch_init
+    Route route_with         -> act_route route_with
+    MergeUsers users         -> act_merge_users users
+    MergeUserIds ids         -> act_merge_user_ids ids
+    Save                     -> act_save
+    SaveThreadPost           -> act_save_threadPost
+    DoLike ent ent_id m_like -> act_do_like ent ent_id m_like
 
     -- Operations that should only run on a frontend.
     _ -> done
@@ -1143,3 +1144,8 @@ runCore st core_result action         = runCoreM st $ do
           Store{..} <- get
           modify (\st'->st'{_usersCache = Map.union new_users_map _usersCache})
           done
+
+  -- | Like, Neutral, Dislike, or Unlike something
+  --
+  act_do_like ent ent_id m_like = do
+    done

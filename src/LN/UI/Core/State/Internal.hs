@@ -109,25 +109,26 @@ data Action
   | Init
   | Route RouteWith
 
-  | MergeUsers [UserSanitizedResponse]  -- ^ Merge users into usersCache, fetching if they don't exist
-  | MergeUserIds [UserId]               -- ^ Merge user id's into usersCache, fetching if they don't exist
+  | MergeUsers [UserSanitizedResponse]   -- ^ Merge users into usersCache, fetching if they don't exist
+  | MergeUserIds [UserId]                -- ^ Merge user id's into usersCache, fetching if they don't exist
 
-  | MachNext Action                     -- ^ Used by an ln-ui-* frontend to obtain the next state
+  | MachNext Action                      -- ^ Used by an ln-ui-* frontend to obtain the next state
 
-  | Save                                -- ^ A global "Save", which uses State & current route to
-                                        -- figure out what we are saving.
+  | Save                                 -- ^ A global "Save", which uses State & current route to
+                                         -- figure out what we are saving.
 
   | SaveThreadPost
-                                        -- ^ Save, but specific to thread posts. Since thread posts
-                                        -- can be saved from:
-                                        -- OrganizationsForumsBoardsThreads and
-                                        -- OrganizationsForumsBoardsThreadsPosts
-                                        -- It needs its' own type
+                                         -- ^ Save, but specific to thread posts. Since thread posts
+                                         -- can be saved from:
+                                         -- OrganizationsForumsBoardsThreads and
+                                         -- OrganizationsForumsBoardsThreadsPosts
+                                         -- It needs its' own type
+  | DoLike Ent Int64 (Maybe LikeRequest) -- Like, Neutral, Dislike, or Unlike something
 
-  | ApplyState (Store -> Store)         -- ^ used only be ln-ui-* frontends. This is how they can set
-                                        -- the Store state, using the same Action sum type
+  | ApplyState (Store -> Store)          -- ^ used only be ln-ui-* frontends. This is how they can set
+                                         -- the Store state, using the same Action sum type
 
-  | Goto RouteWith                      -- ^ used only by ln-ui-* frontends. This should change the
-                                        -- current route, directory, etc.
+  | Goto RouteWith                       -- ^ used only by ln-ui-* frontends. This should change the
+                                         -- current route, directory, etc.
 
   deriving (Typeable, Generic, NFData)
