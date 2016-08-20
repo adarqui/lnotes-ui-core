@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns     #-}
 {-# LANGUAGE ExplicitForAll   #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase       #-}
@@ -26,49 +27,49 @@ import           LN.UI.Core.State
 
 
 setDisplayName :: ThreadRequest -> Text -> Action
-setDisplayName request@ThreadRequest{..} input =
-  ApplyState (\st->st{_m_threadRequest = Just $! request{threadRequestDisplayName = input}})
+setDisplayName !request@ThreadRequest{..} !input =
+  ApplyState (\st->st{_m_threadRequest = Just $ request{threadRequestDisplayName = input}})
 
 
 
 setDescription :: ThreadRequest -> Text -> Action
-setDescription request@ThreadRequest{..} input =
-  ApplyState (\st->st{_m_threadRequest = Just $! request{threadRequestDescription = Just $! input}})
+setDescription !request@ThreadRequest{..} !input =
+  ApplyState (\st->st{_m_threadRequest = Just $ request{threadRequestDescription = Just input}})
 
 
 
 clearDescription :: ThreadRequest -> Action
-clearDescription request@ThreadRequest{..} =
-  ApplyState (\st->st{_m_threadRequest = Just $! request{threadRequestDescription = Nothing }})
+clearDescription !request@ThreadRequest{..} =
+  ApplyState (\st->st{_m_threadRequest = Just $ request{threadRequestDescription = Nothing }})
 
 
 
 setSticky :: ThreadRequest -> Bool -> Action
-setSticky request@ThreadRequest{..} input =
-  ApplyState (\st->st{_m_threadRequest = Just $! request{threadRequestSticky = input }})
+setSticky !request@ThreadRequest{..} !input =
+  ApplyState (\st->st{_m_threadRequest = Just $ request{threadRequestSticky = input }})
 
 
 
 setLocked :: ThreadRequest -> Bool -> Action
-setLocked request@ThreadRequest{..} input =
-  ApplyState (\st->st{_m_threadRequest = Just $! request{threadRequestLocked = input }})
+setLocked !request@ThreadRequest{..} !input =
+  ApplyState (\st->st{_m_threadRequest = Just $ request{threadRequestLocked = input }})
 
 
 
 setTag :: ThreadRequest -> Text -> Action
-setTag request@ThreadRequest{..} input =
+setTag !request@ThreadRequest{..} !input =
    ApplyState (\st->
      st{
-       _m_threadRequest = Just $! request{threadRequestStateTag = Just input}
+       _m_threadRequest = Just $ request{threadRequestStateTag = Just input}
      })
 
 
 
 addTag :: ThreadRequest -> Action
-addTag request@ThreadRequest{..} =
+addTag !request@ThreadRequest{..} =
   ApplyState (\st->
     st{
-      _m_threadRequest = Just $! request{threadRequestTags = tags, threadRequestStateTag = Nothing}
+      _m_threadRequest = Just $ request{threadRequestTags = tags, threadRequestStateTag = Nothing}
     })
   where
   (tags, _) = Tag.addTag threadRequestTags threadRequestStateTag
@@ -76,10 +77,10 @@ addTag request@ThreadRequest{..} =
 
 
 deleteTag :: ThreadRequest -> Int -> Action
-deleteTag request@ThreadRequest{..} idx =
+deleteTag !request@ThreadRequest{..} !idx =
   ApplyState (\st->
     st{
-      _m_threadRequest = Just $! request{threadRequestTags = tags}
+      _m_threadRequest = Just $ request{threadRequestTags = tags}
     })
   where
   tags = Tag.deleteTag threadRequestTags idx
@@ -87,5 +88,5 @@ deleteTag request@ThreadRequest{..} idx =
 
 
 clearTags :: ThreadRequest -> Action
-clearTags request@ThreadRequest{..} =
-  ApplyState (\st->st{_m_threadRequest = Just $! request{threadRequestTags = []}})
+clearTags !request@ThreadRequest{..} =
+  ApplyState (\st->st{_m_threadRequest = Just $ request{threadRequestTags = []}})

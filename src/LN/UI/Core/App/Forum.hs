@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns     #-}
 {-# LANGUAGE ExplicitForAll   #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase       #-}
@@ -30,73 +31,73 @@ import           LN.UI.Core.State
 
 
 setDisplayName :: ForumRequest -> Text -> Action
-setDisplayName request@ForumRequest{..} input =
-  ApplyState (\st->st{_m_forumRequest = Just $! request{forumRequestDisplayName = input}})
+setDisplayName !request@ForumRequest{..} !input =
+  ApplyState (\st->st{_m_forumRequest = Just $ request{forumRequestDisplayName = input}})
 
 
 
 setDescription :: ForumRequest -> Text -> Action
-setDescription request@ForumRequest{..} input =
-  ApplyState (\st->st{_m_forumRequest = Just $! request{forumRequestDescription = Just $! input}})
+setDescription !request@ForumRequest{..} !input =
+  ApplyState (\st->st{_m_forumRequest = Just $ request{forumRequestDescription = Just input}})
 
 
 
 clearDescription :: ForumRequest -> Action
-clearDescription request@ForumRequest{..} =
-  ApplyState (\st->st{_m_forumRequest = Just $! request{forumRequestDescription = Nothing }})
+clearDescription !request@ForumRequest{..} =
+  ApplyState (\st->st{_m_forumRequest = Just $ request{forumRequestDescription = Nothing }})
 
 
 
 setThreadsPerBoard :: ForumRequest -> Int -> Action
-setThreadsPerBoard request@ForumRequest{..} input =
-  ApplyState (\st->st{_m_forumRequest = Just $! request{forumRequestThreadsPerBoard = input}})
+setThreadsPerBoard !request@ForumRequest{..} !input =
+  ApplyState (\st->st{_m_forumRequest = Just $ request{forumRequestThreadsPerBoard = input}})
 
 
 
 setThreadPostsPerThread :: ForumRequest -> Int -> Action
-setThreadPostsPerThread request@ForumRequest{..} input =
-  ApplyState (\st->st{_m_forumRequest = Just $! request{forumRequestThreadPostsPerThread = input}})
+setThreadPostsPerThread !request@ForumRequest{..} !input =
+  ApplyState (\st->st{_m_forumRequest = Just $ request{forumRequestThreadPostsPerThread = input}})
 
 
 
 setRecentThreadsLimit :: ForumRequest -> Int -> Action
-setRecentThreadsLimit request@ForumRequest{..} input =
-  ApplyState (\st->st{_m_forumRequest = Just $! request{forumRequestRecentThreadsLimit = input}})
+setRecentThreadsLimit !request@ForumRequest{..} !input =
+  ApplyState (\st->st{_m_forumRequest = Just $ request{forumRequestRecentThreadsLimit = input}})
 
 
 
 setRecentPostsLimit :: ForumRequest -> Int -> Action
-setRecentPostsLimit request@ForumRequest{..} input =
-  ApplyState (\st->st{_m_forumRequest = Just $! request{forumRequestRecentPostsLimit = input}})
+setRecentPostsLimit !request@ForumRequest{..} !input =
+  ApplyState (\st->st{_m_forumRequest = Just $ request{forumRequestRecentPostsLimit = input}})
 
 
 
 setMotwLimit :: ForumRequest -> Int -> Action
-setMotwLimit request@ForumRequest{..} input =
-  ApplyState (\st->st{_m_forumRequest = Just $! request{forumRequestMotwLimit = input}})
+setMotwLimit !request@ForumRequest{..} !input =
+  ApplyState (\st->st{_m_forumRequest = Just $ request{forumRequestMotwLimit = input}})
 
 
 
 setVisibility :: ForumRequest -> Visibility -> Action
-setVisibility request@ForumRequest{..} input =
-  ApplyState (\st->st{_m_forumRequest = Just $! request{forumRequestVisibility = input}})
+setVisibility !request@ForumRequest{..} !input =
+  ApplyState (\st->st{_m_forumRequest = Just $ request{forumRequestVisibility = input}})
 
 
 
 setTag :: ForumRequest -> Text -> Action
-setTag request@ForumRequest{..} input =
+setTag !request@ForumRequest{..} !input =
    ApplyState (\st->
      st{
-       _m_forumRequest = Just $! request{forumRequestStateTag = Just input}
+       _m_forumRequest = Just $ request{forumRequestStateTag = Just input}
      })
 
 
 
 addTag :: ForumRequest -> Action
-addTag request@ForumRequest{..} =
+addTag !request@ForumRequest{..} =
   ApplyState (\st->
     st{
-      _m_forumRequest = Just $! request{forumRequestTags = tags, forumRequestStateTag = Nothing}
+      _m_forumRequest = Just $ request{forumRequestTags = tags, forumRequestStateTag = Nothing}
     })
   where
   (tags, _) = Tag.addTag forumRequestTags forumRequestStateTag
@@ -104,10 +105,10 @@ addTag request@ForumRequest{..} =
 
 
 deleteTag :: ForumRequest -> Int -> Action
-deleteTag request@ForumRequest{..} idx =
+deleteTag !request@ForumRequest{..} !idx =
   ApplyState (\st->
     st{
-      _m_forumRequest = Just $! request{forumRequestTags = tags}
+      _m_forumRequest = Just $ request{forumRequestTags = tags}
     })
   where
   tags = Tag.deleteTag forumRequestTags idx
@@ -115,5 +116,5 @@ deleteTag request@ForumRequest{..} idx =
 
 
 clearTags :: ForumRequest -> Action
-clearTags request@ForumRequest{..} =
-  ApplyState (\st->st{_m_forumRequest = Just $! request{forumRequestTags = []}})
+clearTags !request@ForumRequest{..} =
+  ApplyState (\st->st{_m_forumRequest = Just $ request{forumRequestTags = []}})

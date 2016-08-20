@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns     #-}
 {-# LANGUAGE ExplicitForAll   #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase       #-}
@@ -28,37 +29,37 @@ import           LN.UI.Core.State
 
 
 setTitle :: ThreadPostRequest -> Text -> Action
-setTitle request@ThreadPostRequest{..} input =
-  ApplyState (\st->st{_m_threadPostRequest = Just $! request{threadPostRequestTitle = Just input}})
+setTitle !request@ThreadPostRequest{..} !input =
+  ApplyState (\st->st{_m_threadPostRequest = Just $ request{threadPostRequestTitle = Just input}})
 
 
 
 clearTitle :: ThreadPostRequest -> Action
-clearTitle request@ThreadPostRequest{..} =
-  ApplyState (\st->st{_m_threadPostRequest = Just $! request{threadPostRequestTitle = Nothing}})
+clearTitle !request@ThreadPostRequest{..} =
+  ApplyState (\st->st{_m_threadPostRequest = Just $ request{threadPostRequestTitle = Nothing}})
 
 
 
 setBody :: ThreadPostRequest -> PostData -> Action
-setBody request@ThreadPostRequest{..} input =
-  ApplyState (\st->st{_m_threadPostRequest = Just $! request{threadPostRequestBody = input}})
+setBody !request@ThreadPostRequest{..} !input =
+  ApplyState (\st->st{_m_threadPostRequest = Just $ request{threadPostRequestBody = input}})
 
 
 
 setTag :: ThreadPostRequest -> Text -> Action
-setTag request@ThreadPostRequest{..} input =
+setTag !request@ThreadPostRequest{..} !input =
    ApplyState (\st->
      st{
-       _m_threadPostRequest = Just $! request{threadPostRequestStateTag = Just input}
+       _m_threadPostRequest = Just $ request{threadPostRequestStateTag = Just input}
      })
 
 
 
 addTag :: ThreadPostRequest -> Action
-addTag request@ThreadPostRequest{..} =
+addTag !request@ThreadPostRequest{..} =
   ApplyState (\st->
     st{
-      _m_threadPostRequest = Just $! request{threadPostRequestTags = tags, threadPostRequestStateTag = Nothing}
+      _m_threadPostRequest = Just $ request{threadPostRequestTags = tags, threadPostRequestStateTag = Nothing}
     })
   where
   (tags, _) = Tag.addTag threadPostRequestTags threadPostRequestStateTag
@@ -66,10 +67,10 @@ addTag request@ThreadPostRequest{..} =
 
 
 deleteTag :: ThreadPostRequest -> Int -> Action
-deleteTag request@ThreadPostRequest{..} idx =
+deleteTag !request@ThreadPostRequest{..} !idx =
   ApplyState (\st->
     st{
-      _m_threadPostRequest = Just $! request{threadPostRequestTags = tags}
+      _m_threadPostRequest = Just $ request{threadPostRequestTags = tags}
     })
   where
   tags = Tag.deleteTag threadPostRequestTags idx
@@ -77,27 +78,27 @@ deleteTag request@ThreadPostRequest{..} idx =
 
 
 clearTags :: ThreadPostRequest -> Action
-clearTags request@ThreadPostRequest{..} =
-  ApplyState (\st->st{_m_threadPostRequest = Just $! request{threadPostRequestTags = []}})
+clearTags !request@ThreadPostRequest{..} =
+  ApplyState (\st->st{_m_threadPostRequest = Just $ request{threadPostRequestTags = []}})
 
 
 
 
 
 setPrivateTag :: ThreadPostRequest -> Text -> Action
-setPrivateTag request@ThreadPostRequest{..} input =
+setPrivateTag !request@ThreadPostRequest{..} !input =
    ApplyState (\st->
      st{
-       _m_threadPostRequest = Just $! request{threadPostRequestStatePrivateTag = Just input}
+       _m_threadPostRequest = Just $ request{threadPostRequestStatePrivateTag = Just input}
      })
 
 
 
 addPrivateTag :: ThreadPostRequest -> Action
-addPrivateTag request@ThreadPostRequest{..} =
+addPrivateTag !request@ThreadPostRequest{..} =
   ApplyState (\st->
     st{
-      _m_threadPostRequest = Just $! request{threadPostRequestPrivateTags = tags, threadPostRequestStatePrivateTag = Nothing}
+      _m_threadPostRequest = Just $ request{threadPostRequestPrivateTags = tags, threadPostRequestStatePrivateTag = Nothing}
     })
   where
   (tags, _) = Tag.addTag threadPostRequestPrivateTags threadPostRequestStatePrivateTag
@@ -105,10 +106,10 @@ addPrivateTag request@ThreadPostRequest{..} =
 
 
 deletePrivateTag :: ThreadPostRequest -> Int -> Action
-deletePrivateTag request@ThreadPostRequest{..} idx =
+deletePrivateTag !request@ThreadPostRequest{..} !idx =
   ApplyState (\st->
     st{
-      _m_threadPostRequest = Just $! request{threadPostRequestPrivateTags = tags}
+      _m_threadPostRequest = Just $ request{threadPostRequestPrivateTags = tags}
     })
   where
   tags = Tag.deleteTag threadPostRequestPrivateTags idx
@@ -116,5 +117,5 @@ deletePrivateTag request@ThreadPostRequest{..} idx =
 
 
 clearPrivateTags :: ThreadPostRequest -> Action
-clearPrivateTags request@ThreadPostRequest{..} =
-  ApplyState (\st->st{_m_threadPostRequest = Just $! request{threadPostRequestPrivateTags = []}})
+clearPrivateTags !request@ThreadPostRequest{..} =
+  ApplyState (\st->st{_m_threadPostRequest = Just $ request{threadPostRequestPrivateTags = []}})
