@@ -1157,6 +1157,7 @@ runCore st core_result action         = runCoreM st $ do
         api $ deleteLike' ent_id
         done
       _        -> done
+
   act_do_like ent ent_id (Just like_request) = do
     case ent of
       Ent_Like -> do
@@ -1176,6 +1177,7 @@ runCore st core_result action         = runCoreM st $ do
         api $ deleteStar' ent_id
         done
       _        -> done
+
   act_do_star ent ent_id (Just star_request) = do
     case ent of
       Ent_Star -> do
