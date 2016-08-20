@@ -15,10 +15,13 @@ module LN.UI.Core.App (
 import           Control.Monad.IO.Class     ()
 import           Control.Monad.RWS.Strict
 import           Control.Monad.Trans.Either
+import           Data.Int                   (Int64)
 import           Data.List                  (nub)
 import qualified Data.Map                   as Map
 import           Data.Rehtie
 import           Haskell.Helpers.Either
+import           Haskell.Api.Helpers
+import           Haskell.Api.Helpers.Shared
 
 import           LN.Api
 import qualified LN.Api.String              as ApiS
@@ -1147,5 +1150,28 @@ runCore st core_result action         = runCoreM st $ do
 
   -- | Like, Neutral, Dislike, or Unlike something
   --
-  act_do_like ent ent_id m_like = do
-    done
+  act_do_like ent ent_id Nothing = do
+    case ent of
+      Ent_Like -> do
+        api $ deleteLike' ent_id
+        done
+      _        -> done
+  act_do_like ent ent_id (Just like_request) = do
+    case ent of
+      Ent_Like -> do
+        api $ putLike' ent_id like_request
+        done
+      _        -> do
+        api $ postLike ent ent_id like_request
+        done
+
+
+
+-- TODO FIXME
+-- move this somewhere else, ie, ln-api
+--
+postLike :: Ent -> Int64 -> LikeRequest -> ApiEff SpecificApiOptions (Either (ApiError ApplicationError) LikeResponse)
+postLike ent ent_id like_request =
+  case ent of
+    Ent_ThreadPost -> postLike_ByThreadPostId' ent_id like_request
+    _              -> error "unsupported"
