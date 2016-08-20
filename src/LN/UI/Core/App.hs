@@ -60,6 +60,7 @@ runCore st core_result action         = runCoreM st $ do
     Save                     -> act_save
     SaveThreadPost           -> act_save_threadPost
     DoLike ent ent_id m_like -> act_do_like ent ent_id m_like
+    DoStar ent ent_id m_star -> act_do_star ent ent_id m_star
 
     -- Operations that should only run on a frontend.
     _ -> done
@@ -1167,6 +1168,24 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
+  -- | Star, Unstar
+  --
+  act_do_star ent ent_id Nothing = do
+    case ent of
+      Ent_Star -> do
+        api $ deleteStar' ent_id
+        done
+      _        -> done
+  act_do_star ent ent_id (Just star_request) = do
+    case ent of
+      Ent_Star -> do
+        api $ putStar' ent_id star_request
+        done
+      _        -> do
+        api $ postStar ent ent_id star_request
+        done
+
+
 -- TODO FIXME
 -- move this somewhere else, ie, ln-api
 --
@@ -1174,4 +1193,15 @@ postLike :: Ent -> Int64 -> LikeRequest -> ApiEff SpecificApiOptions (Either (Ap
 postLike ent ent_id like_request =
   case ent of
     Ent_ThreadPost -> postLike_ByThreadPostId' ent_id like_request
+    _              -> error "unsupported"
+
+
+
+-- TODO FIXME
+-- move this somewhere else, ie, ln-api
+--
+postStar :: Ent -> Int64 -> StarRequest -> ApiEff SpecificApiOptions (Either (ApiError ApplicationError) StarResponse)
+postStar ent ent_id star_request =
+  case ent of
+    Ent_ThreadPost -> postStar_ByThreadPostId' ent_id star_request
     _              -> error "unsupported"

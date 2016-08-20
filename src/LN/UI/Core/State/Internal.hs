@@ -124,6 +124,7 @@ data Action
                                          -- OrganizationsForumsBoardsThreadsPosts
                                          -- It needs its' own type
   | DoLike Ent Int64 (Maybe LikeRequest) -- Like, Neutral, Dislike, or Unlike something
+  | DoStar Ent Int64 (Maybe StarRequest) -- Star, Unstar
 
   | ApplyState (Store -> Store)          -- ^ used only be ln-ui-* frontends. This is how they can set
                                          -- the Store state, using the same Action sum type
