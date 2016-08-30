@@ -139,7 +139,9 @@ runCore st core_result action         = runCoreM st $ do
     -- RouteWith (Users (EditS user_sid)) _   -> start
     -- RouteWith (Users (DeleteS user_sid)) _ -> start
 
-    RouteWith _ _ -> start
+    RouteWith (Experiments _) _ -> do_experiments
+
+    RouteWith _ _               -> start
 
     where
     route               = case route_with of RouteWith route' _ -> route'
@@ -152,6 +154,14 @@ runCore st core_result action         = runCoreM st $ do
 
 
 
+
+    do_experiments :: MonadIO m => CoreM m CoreResult
+    do_experiments = do
+      -- Just load up some mock stuff that we may need for experiments
+      modify (\st'->st'{
+        _m_threadPostRequest = Just defaultThreadPostRequest
+      })
+      done
 
 
     load_users :: MonadIO m => CoreM m CoreResult
