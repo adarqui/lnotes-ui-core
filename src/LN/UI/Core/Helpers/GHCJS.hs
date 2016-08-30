@@ -2,8 +2,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module LN.UI.Core.Helpers.GHCJS (
-  JSString,
-  textToJSString'
+    JSString
+  , textToJSString'
+  , showToJSString'
 ) where
 
 
@@ -26,4 +27,14 @@ textToJSString' = JSS.textToJSString
 #else
 textToJSString' :: Text -> String
 textToJSString' = Text.unpack
+#endif
+
+
+
+#ifdef __GHCJS__
+showToJSString' :: Show a => a -> JSString
+showToJSString' = textToJSString' . Text.pack . show
+#else
+showToJSString' :: Show a => a -> String
+showToJSString' = textToJSString' . Text.pack . show
 #endif

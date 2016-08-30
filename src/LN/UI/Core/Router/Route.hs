@@ -125,6 +125,7 @@ data Route
   | Login
   | Logout
   | NotFound
+  | Test Text
   deriving (Eq, Show, Generic, NFData)
 
 
@@ -167,6 +168,7 @@ instance HasLinkName Route where
     UsersProfile _ EditZ            -> "Edit Profile"
     Login                           -> "Login"
     Logout                          -> "Logout"
+    Test test_sid                   -> "Test " <> test_sid
     _                               -> "Unknown"
 
 
@@ -221,6 +223,7 @@ instance PathInfo Route where
     Users crud                 -> (pure "users") <> toPathSegments crud
     UsersProfile user_sid Index -> (pure "users") <> (pure user_sid) <> (pure "profile")
     UsersProfile user_sid crud  -> (pure "users") <> (pure user_sid) <> (pure "profile") <> toPathSegments crud
+    Test test_sid              -> pure "test" <> pure test_sid
     _                          -> pure ""
 
   fromPathSegments =
@@ -228,6 +231,7 @@ instance PathInfo Route where
     <|> Me            <$ segment "me"
     <|> Errors        <$ segment "errors"
     <|> Portal        <$ segment "portal"
+    <|> Test          <$ segment "test" <*> fromPathSegments
     <|> (try
             (UsersProfile  <$ segment "users" <*> fromPathSegments <*> (segment "profile" *> fromPathSegments))
             <|>
