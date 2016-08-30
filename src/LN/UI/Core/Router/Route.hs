@@ -168,7 +168,7 @@ instance HasLinkName Route where
     UsersProfile _ EditZ            -> "Edit Profile"
     Login                           -> "Login"
     Logout                          -> "Logout"
-    Experiments experiment_sid      -> "Experiment " <> experiment_sid
+    Experiments experiment_sid      -> experiment_sid
     _                               -> "Unknown"
 
 
