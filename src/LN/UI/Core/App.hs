@@ -1219,6 +1219,7 @@ runCore st core_result action         = runCoreM st $ do
             let team_member_request = defaultTeamMemberRequest
             lr <- api $ postTeamMember_ByOrganizationId' organizationPackResponseOrganizationId team_member_request
             rehtie lr apiError $ \_ -> do
+              -- TODO FIXME: need to bust 'cache' when re-routing -> or go to a join success page
               reroute $ RouteWith (Organizations (ShowS organizationResponseName)) emptyParams
 
 
