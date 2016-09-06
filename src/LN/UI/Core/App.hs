@@ -1,7 +1,8 @@
-{-# LANGUAGE ExplicitForAll   #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE LambdaCase       #-}
-{-# LANGUAGE RecordWildCards  #-}
+{-# LANGUAGE ExplicitForAll    #-}
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
 
 -- | MUST REDUCE THE SIZE OF THIS FILE TO ~500 LINES
 -- Too much redundant insanity.
@@ -19,16 +20,16 @@ import           Data.Int                   (Int64)
 import           Data.List                  (nub)
 import qualified Data.Map                   as Map
 import           Data.Rehtie
-import           Haskell.Helpers.Either
 import           Haskell.Api.Helpers
 import           Haskell.Api.Helpers.Shared
+import           Haskell.Helpers.Either
 
 import           LN.Api
 import qualified LN.Api.String              as ApiS
 import           LN.Generate.Default
 import           LN.T
-import LN.T.Param
 import           LN.T.Convert
+import           LN.T.Param
 import           LN.UI.Core.Api
 import           LN.UI.Core.Control
 import           LN.UI.Core.Helpers.Map
@@ -61,6 +62,7 @@ runCore st core_result action         = runCoreM st $ do
     SaveThreadPost           -> act_save_threadPost
     DoLike ent ent_id m_like -> act_do_like ent ent_id m_like
     DoStar ent ent_id m_star -> act_do_star ent ent_id m_star
+    JoinOrganization         -> act_join_organization
 
     -- Operations that should only run on a frontend.
     _ -> done
@@ -1196,6 +1198,48 @@ runCore st core_result action         = runCoreM st $ do
       _        -> do
         api $ postStar ent ent_id star_request
         done
+
+
+  act_join_organization = do
+    Store{..} <- get
+    case _l_m_organization of
+      Loading                                    -> unexpectedError
+      Loaded Nothing                             -> unexpectedError
+      Loaded (Just OrganizationPackResponse{..}) -> do
+        let
+          OrganizationResponse{..} = organizationPackResponseOrganization
+        if Team_Members `elem` organizationPackResponseTeams
+          then
+            -- Already a member
+            --
+            errorMessage "Already a member."
+          else do
+            -- Attempt to join organization
+            --
+            let team_member_request = defaultTeamMemberRequest
+            lr <- api $ postTeamMember_ByOrganizationId' organizationPackResponseOrganizationId team_member_request
+            rehtie lr apiError $ \_ -> do
+              reroute $ RouteWith (Organizations (ShowS organizationResponseName)) emptyParams
+
+
+
+  unexpectedError = errorMessage "Unexpected error."
+
+  apiError (DecodeError _)   = errorMessage "Unexpected JSON decode error."
+  apiError (ServerError _ _) = errorMessage "Unexpected server error."
+
+  errorMessage msg = setError msg
+
+  setError msg = do
+    modify (\st'@Store{..}->st'{ _errors = msg : _errors })
+    done
+
+--   clearErrors = do
+--     modify (\st'->st'{ _errorText = [] })
+--     done
+
+
+
 
 
 -- TODO FIXME

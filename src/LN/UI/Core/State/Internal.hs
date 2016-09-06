@@ -35,6 +35,7 @@ import           LN.UI.Core.Types
 data Store = Store {
         _route                    :: !RouteWith
       , _pageInfo                 :: !PageInfo
+      , _errors                   :: ![Text]
       , _l_m_me                   :: !(Loader (Maybe UserResponse))
       , _meId                     :: !UserId
       , _usersCache               :: !(Map UserId UserSanitizedPackResponse)
@@ -65,6 +66,7 @@ defaultStore :: Store
 defaultStore = Store {
         _route                    = routeWith' Home
       , _pageInfo                 = defaultPageInfo
+      , _errors                   = []
       , _l_m_me                   = Loaded Nothing
       , _meId                     = 0
       , _usersCache               = Map.empty
@@ -125,6 +127,8 @@ data Action
                                          -- It needs its' own type
   | DoLike Ent Int64 (Maybe LikeRequest) -- Like, Neutral, Dislike, or Unlike something
   | DoStar Ent Int64 (Maybe StarRequest) -- Star, Unstar
+
+  | JoinOrganization                     -- Join the current organization
 
   | ApplyState (Store -> Store)          -- ^ used only be ln-ui-* frontends. This is how they can set
                                          -- the Store state, using the same Action sum type
