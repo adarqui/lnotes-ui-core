@@ -42,7 +42,8 @@ clearTitle !request@ThreadPostRequest{..} =
 
 setBody :: ThreadPostRequest -> PostData -> Action
 setBody !request@ThreadPostRequest{..} !input =
-  ApplyState (\st->st{_m_threadPostRequest = Just $ request{threadPostRequestBody = input}})
+  -- DO NOT RE-RENDER EVERY TIME WE RECEIVE AN INPUT CHAR!!
+  ApplyStateRender False (\st->st{_m_threadPostRequest = Just $ request{threadPostRequestBody = input}})
 
 
 

@@ -58,6 +58,7 @@ data Store = Store {
       , _m_threadPostRequest      :: !(Maybe ThreadPostRequest)
       , _l_recentThreadPosts      :: !(Loader (Map ThreadPostId ThreadPostPackResponse))
       , _m_profileRequest         :: !(Maybe ProfileRequest)
+      , _render                   :: !Bool
     } deriving (Typeable, Generic, NFData)
 
 
@@ -89,6 +90,7 @@ defaultStore = Store {
       , _m_threadPostRequest      = Nothing
       , _l_recentThreadPosts      = Loaded Map.empty
       , _m_profileRequest         = Nothing
+      , _render                   = True
     }
 
 
@@ -132,6 +134,9 @@ data Action
 
   | ApplyState (Store -> Store)          -- ^ used only be ln-ui-* frontends. This is how they can set
                                          -- the Store state, using the same Action sum type
+
+  | ApplyStateRender Bool (Store -> Store) -- ^ With this we can tell the frontend to render or not
+                                           -- this might work in the future..
 
   | Goto RouteWith                       -- ^ used only by ln-ui-* frontends. This should change the
                                          -- current route, directory, etc.

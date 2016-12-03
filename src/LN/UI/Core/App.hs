@@ -50,6 +50,7 @@ runCore
   -> Action                    -- ^ The action we are operating on
   -> m (CoreResult, CoreState) -- ^ The newly computed route & state
 
+runCore st core_result (ApplyStateRender b f) = pure (core_result, (f st) { _render = b })
 runCore st core_result (ApplyState f) = pure (core_result, f st)
 runCore st _ (MachNext action)        = runCore st Next action
 runCore st core_result action         = runCoreM st $ do
