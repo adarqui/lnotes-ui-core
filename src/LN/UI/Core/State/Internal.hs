@@ -127,6 +127,9 @@ data Action
                                          -- OrganizationsForumsBoardsThreads and
                                          -- OrganizationsForumsBoardsThreadsPosts
                                          -- It needs its' own type
+                                         --
+  | SaveThreadPostInPlace
+
   | DoLike Ent Int64 (Maybe LikeRequest) -- Like, Neutral, Dislike, or Unlike something
   | DoStar Ent Int64 (Maybe StarRequest) -- Star, Unstar
 

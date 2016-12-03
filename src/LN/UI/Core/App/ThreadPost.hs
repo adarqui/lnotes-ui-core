@@ -8,6 +8,7 @@ module LN.UI.Core.App.ThreadPost (
     setTitle
   , clearTitle
   , setBody
+  , clearBody
   , setTag
   , addTag
   , deleteTag
@@ -44,6 +45,12 @@ setBody :: ThreadPostRequest -> PostData -> Action
 setBody !request@ThreadPostRequest{..} !input =
   -- DO NOT RE-RENDER EVERY TIME WE RECEIVE AN INPUT CHAR!!
   ApplyStateRender False (\st->st{_m_threadPostRequest = Just $ request{threadPostRequestBody = input}})
+
+
+
+clearBody :: Action
+clearBody =
+  ApplyStateRender False (\st->st{_m_threadPostRequest = Nothing})
 
 
 

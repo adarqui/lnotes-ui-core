@@ -61,6 +61,7 @@ runCore st core_result action         = runCoreM st $ do
     MergeUserIds ids         -> act_merge_user_ids ids
     Save                     -> act_save
     SaveThreadPost           -> act_save_threadPost
+    SaveThreadPostInPlace    -> act_save_threadPost_inPlace
     DoLike ent ent_id m_like -> act_do_like ent ent_id m_like
     DoStar ent ent_id m_star -> act_do_star ent ent_id m_star
     JoinOrganization         -> act_join_organization
@@ -1131,6 +1132,28 @@ runCore st core_result action         = runCoreM st $ do
                 _                                        -> api $ postThreadPost_ByThreadId' threadPackResponseThreadId request
         rehtie lr (const done) $ \ThreadPostResponse{..} -> do
           reroute $ RouteWith (OrganizationsForumsBoardsThreadsPosts (organizationResponseName organizationPackResponseOrganization) (forumResponseName forumPackResponseForum) (boardResponseName boardPackResponseBoard) (threadResponseName threadPackResponseThread) (ShowI threadPostResponseId)) emptyParams
+      _ -> done
+
+  -- Needs to be separated out
+  -- because we can save thread posts from the Threads route
+  --
+  act_save_threadPost_inPlace :: MonadIO m => CoreM m CoreResult
+  act_save_threadPost_inPlace = do
+    Store{..} <- get
+    case (_l_m_organization, _l_m_forum, _l_m_board, _l_m_thread, _m_threadPostRequest) of
+      (Loaded (Just OrganizationPackResponse{..}), Loaded (Just ForumPackResponse{..}), Loaded (Just BoardPackResponse{..}), Loaded (Just ThreadPackResponse{..}), Just request) -> do
+        lr <- case _l_m_threadPost of
+                Loaded (Just ThreadPostPackResponse{..}) -> api $ putThreadPost' threadPostPackResponseThreadPostId request
+                _                                        -> api $ postThreadPost_ByThreadId' threadPackResponseThreadId request
+        rehtie lr (const done) $ \ThreadPostResponse{..} -> do
+          lr' <- api $ getThreadPostPack' threadPostResponseId
+          rehtie lr' (const done) $ \tpr -> do
+            case _l_threadPosts of
+              Loaded _threadPosts -> do
+                                     modify (\st'->st'{_l_threadPosts = Loaded (Map.insert threadPostResponseId tpr _threadPosts), _m_threadPostRequest = Just defaultThreadPostRequest })
+                                     done
+              _                   -> done
+        done
       _ -> done
 
 
