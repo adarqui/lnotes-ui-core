@@ -1,8 +1,9 @@
-{-# LANGUAGE BangPatterns     #-}
-{-# LANGUAGE ExplicitForAll   #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE LambdaCase       #-}
-{-# LANGUAGE RecordWildCards  #-}
+{-# LANGUAGE BangPatterns      #-}
+{-# LANGUAGE ExplicitForAll    #-}
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module LN.UI.Core.App.ThreadPost (
     setTitle
@@ -17,14 +18,17 @@ module LN.UI.Core.App.ThreadPost (
   , addPrivateTag
   , deletePrivateTag
   , clearPrivateTags
+  , quote
 ) where
 
 
 
-import           Data.Text          (Text)
+import           Data.Monoid         ((<>))
+import           Data.Text           (Text)
 
+import           LN.Generate.Default (defaultThreadPostRequest)
 import           LN.T
-import qualified LN.UI.Core.App.Tag as Tag
+import qualified LN.UI.Core.App.Tag  as Tag
 import           LN.UI.Core.State
 
 
@@ -43,14 +47,13 @@ clearTitle !request@ThreadPostRequest{..} =
 
 setBody :: ThreadPostRequest -> PostData -> Action
 setBody !request@ThreadPostRequest{..} !input =
-  -- DO NOT RE-RENDER EVERY TIME WE RECEIVE AN INPUT CHAR!!
-  ApplyStateRender False (\st->st{_m_threadPostRequest = Just $ request{threadPostRequestBody = input}})
+  ApplyState (\st->st{_m_threadPostRequest = Just $ request{threadPostRequestBody = input}})
 
 
 
 clearBody :: Action
 clearBody =
-  ApplyStateRender False (\st->st{_m_threadPostRequest = Nothing})
+  ApplyState (\st->st{_m_threadPostRequest = Nothing})
 
 
 
@@ -127,3 +130,33 @@ deletePrivateTag !request@ThreadPostRequest{..} !idx =
 clearPrivateTags :: ThreadPostRequest -> Action
 clearPrivateTags !request@ThreadPostRequest{..} =
   ApplyState (\st->st{_m_threadPostRequest = Just $ request{threadPostRequestPrivateTags = []}})
+
+
+
+-- TODO FIXME - proper quote bbcode to text
+-- ie, no raw "[quote] strings"
+--
+quote :: ThreadPostPackResponse -> Action
+quote !response@ThreadPostPackResponse{..} =
+  ApplyState (\st@Store{..} ->
+    let
+      request =
+        case _m_threadPostRequest of
+          Nothing ->
+            case threadPostResponseBody of
+              PostDataBBCode quote -> defaultThreadPostRequest { threadPostRequestBody = PostDataBBCode quoted_post }
+              _                    -> defaultThreadPostRequest { threadPostRequestBody = PostDataEmpty }
+          Just req@ThreadPostRequest{..} ->
+            case (threadPostRequestBody, threadPostResponseBody) of
+              (PostDataRaw ours, PostDataRaw quote)       -> req { threadPostRequestBody = PostDataRaw $ ours <> quote }
+              (PostDataBBCode ours, PostDataBBCode quote) -> req { threadPostRequestBody = PostDataBBCode $ ours <> quoted_post }
+              (_, PostDataBBCode quote)                   -> req { threadPostRequestBody = PostDataBBCode $ quoted_post }
+              _                                           -> req { threadPostRequestBody = PostDataEmpty }
+    in
+      st{ _m_threadPostRequest = Just request })
+  where
+  ThreadPostResponse{..} = threadPostPackResponseThreadPost
+  quoted_post =
+    case threadPostResponseBody of
+      PostDataBBCode bbcode -> "[quote author= link= date= id=]" <> bbcode <> "[/quote id=]"
+      _                     -> "LN.UI.Core.App.ThreadPost: quote problem."
