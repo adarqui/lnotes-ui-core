@@ -161,8 +161,9 @@ quote !response@ThreadPostPackResponse{..} =
   UserSanitizedResponse{..} = threadPostPackResponseUser
   quoted_post =
     case threadPostResponseBody of
-      -- PostDataBBCode bbcode -> Text.pack $ printf "[quote author=%d link= date= post_id= author_uid=][/quote post_id=]" (1 :: Int)
       PostDataBBCode bbcode -> Text.pack $
-        printf "[quote author=%s link= date= post_id=%d author_uid=%d]%s[/quote post_id=%d]"
-          userSanitizedResponseDisplayName threadPostResponseId userSanitizedResponseId bbcode threadPostResponseId
+        printf "[quote author= link= date= post_id= author_uid=]\n%s\n[/quote post_id=]"
+          bbcode
+        -- printf "[quote author=%s link= date= post_id=%d author_uid=%d]%s[/quote post_id=%d]"
+        --  userSanitizedResponseDisplayName threadPostResponseId userSanitizedResponseId bbcode threadPostResponseId
       _                     -> "LN.UI.Core.App.ThreadPost: quote problem."
