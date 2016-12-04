@@ -162,7 +162,7 @@ quote !response@ThreadPostPackResponse{..} =
   quoted_post =
     case threadPostResponseBody of
       PostDataBBCode bbcode -> Text.pack $
-        printf "[quote author= link= date= author_uid=%d post_id=%d]\n%s\n[/quote post_id=%d]"
+        printf "[quote author= link= date= author_uid=%d id=%d]\n%s\n[/quote id=%d]"
           userSanitizedResponseId threadPostResponseId bbcode threadPostResponseId
         -- printf "[quote author=%s link= date= post_id=%d author_uid=%d]%s[/quote post_id=%d]"
         --  userSanitizedResponseDisplayName threadPostResponseId userSanitizedResponseId bbcode threadPostResponseId
