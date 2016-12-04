@@ -25,6 +25,8 @@ module LN.UI.Core.App.ThreadPost (
 
 import           Data.Monoid         ((<>))
 import           Data.Text           (Text)
+import qualified Data.Text           as Text
+import           Text.Printf
 
 import           LN.Generate.Default (defaultThreadPostRequest)
 import           LN.T
@@ -155,8 +157,12 @@ quote !response@ThreadPostPackResponse{..} =
     in
       st{ _m_threadPostRequest = Just request })
   where
-  ThreadPostResponse{..} = threadPostPackResponseThreadPost
+  ThreadPostResponse{..}    = threadPostPackResponseThreadPost
+  UserSanitizedResponse{..} = threadPostPackResponseUser
   quoted_post =
     case threadPostResponseBody of
-      PostDataBBCode bbcode -> "[quote author= link= date= id=]" <> bbcode <> "[/quote id=]"
+      -- PostDataBBCode bbcode -> Text.pack $ printf "[quote author=%d link= date= post_id= author_uid=][/quote post_id=]" (1 :: Int)
+      PostDataBBCode bbcode -> Text.pack $
+        printf "[quote author=%s link= date= post_id=%d author_uid=%d]%s[/quote post_id=%d]"
+          userSanitizedResponseDisplayName threadPostResponseId userSanitizedResponseId bbcode threadPostResponseId
       _                     -> "LN.UI.Core.App.ThreadPost: quote problem."
