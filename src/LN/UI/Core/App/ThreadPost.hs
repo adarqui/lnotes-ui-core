@@ -163,8 +163,9 @@ quote !response@ThreadPostPackResponse{..} =
   quoted_post =
     case threadPostResponseBody of
       PostDataBBCode bbcode -> Text.pack $
-        printf "[quote author_name=adarqui author=%d link=/translate/thread_post/%d date=%s id=%d]\n%s\n[/quote id=%d]"
-          userSanitizedResponseId
+        -- TODO FIXME: remove hard coded username - need ghcjs bug fixed?
+        printf "[quote author=adarqui link=/translate/thread_post/%d date=%s id=%d]\n%s\n[/quote id=%d]"
+          -- userSanitizedResponseDisplayName
           threadPostResponseId
           (forumUTCTimeMaybe threadPostResponseCreatedAt)
           threadPostResponseId
