@@ -1,8 +1,8 @@
-name:                ln-ui-core
+name:                lnotes-ui-core
 version:             0.1.0.3
 synopsis:            Core routines for ln-ui-*
 description:         Please see README.md
-homepage:            https://github.com/adarqui/ln-ui-core#readme
+homepage:            https://github.com/adarqui/lnotes-ui-core#readme
 license:             BSD3
 license-file:        LICENSE
 author:              Andrew Darqui
@@ -19,13 +19,7 @@ library
                        LN.UI.Core.Access
                        LN.UI.Core.Api
                        LN.UI.Core.App
-                       LN.UI.Core.App.Board
-                       LN.UI.Core.App.Forum
-                       LN.UI.Core.App.Organization
                        LN.UI.Core.App.Profile
-                       LN.UI.Core.App.Tag
-                       LN.UI.Core.App.Thread
-                       LN.UI.Core.App.ThreadPost
                        LN.UI.Core.Control
                        LN.UI.Core.Loader
                        LN.UI.Core.PageInfo
@@ -77,7 +71,7 @@ library
   ghc-options:         -Wall
   default-language:    Haskell2010
 
-test-suite ln-ui-test
+test-suite lnotes-ui-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
@@ -90,10 +84,10 @@ test-suite ln-ui-test
                      , text
                      , web-routes
                      , haskell-ln-types
-                     , ln-ui-core
+                     , lnotes-ui-core
   ghc-options:         -Wall -O2 -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
 
 source-repository head
   type:     git
-  location: https://github.com/adarqui/ln-ui-core
+  location: https://github.com/adarqui/lnotes-ui-core
