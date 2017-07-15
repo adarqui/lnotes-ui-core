@@ -78,13 +78,17 @@ runCore st core_result action         = runCoreM st $ do
 
 
   fetch_init = do
+    liftIO $ print "WTF"
     lr <- api getMe'
+    liftIO $ print "WTF2"
     rehtie
       lr
       (const cantLoad_init)
       $ \user_pack -> do
         let UserResponse{..} = user_pack
+        liftIO $ print "WTF3"
         modify (\st_->st_{_l_m_me = Loaded $ Just user_pack, _meId = userResponseId})
+        liftIO $ print "WTF4"
         done
 
   load_init = modify (\st'->st'{_l_m_me = Loading}) *> next
@@ -104,8 +108,6 @@ runCore st core_result action         = runCoreM st $ do
     RouteWith (Users (ShowS user_sid)) _      -> basedOn load_user (fetch_user user_sid)
     RouteWith (UsersProfile user_sid _) _     -> basedOn load_user (fetch_user user_sid)
 
-    RouteWith (Experiments _) _ -> do_experiments
-
     RouteWith _ _               -> start
 
     where
@@ -117,16 +119,6 @@ runCore st core_result action         = runCoreM st $ do
 
     new_page_info count = runPageInfo count page_info
 
-
-
-
-    do_experiments :: MonadIO m => CoreM m CoreResult
-    do_experiments = do
-      -- Just load up some mock stuff that we may need for experiments
-      modify (\st'->st'{
-        _m_threadPostRequest = Just defaultThreadPostRequest
-      })
-      done
 
 
     load_users :: MonadIO m => CoreM m CoreResult
